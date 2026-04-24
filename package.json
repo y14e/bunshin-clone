@@ -1,0 +1,50 @@
+{
+  "name": "bunshin-clone",
+  "version": "1.0.0",
+  "description": "High‑performance deep clone utility with descriptor support",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "bun test",
+    "prepublishOnly": "npm run build && npm test",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": [
+    "clone",
+    "deep",
+    "typescript"
+  ],
+  "author": "Yusuke Kamiyamane",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/y14e/bunshin-clone.git"
+  },
+  "bugs": {
+    "url": "https://github.com/y14e/bunshin-clone/issues"
+  },
+  "homepage": "https://github.com/y14e/bunshin-clone#readme",
+  "devDependencies": {
+    "bun-types": "latest",
+    "tsup": "^8.0.0",
+    "typescript": "^5.6.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
