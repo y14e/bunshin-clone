@@ -1,5 +1,5 @@
 /**
- * bunshin-clone
+ * Bunshin Clone
  * High-performance deep clone utility with descriptor support.
  * Supports circular ref and complex built-in types.
  *
