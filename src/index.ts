@@ -3,7 +3,7 @@
  * High-performance deep clone utility with descriptor support.
  * Supports circular ref and complex built-in types.
  *
- * @version 1.0.0
+ * @version 1.0.1
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) 2026 Yusuke Kamiyamane
@@ -40,8 +40,9 @@ const { toString: OBJECT_TO_STRING } = Object.prototype;
 export default function bunshinClone(
   target: unknown,
   options?: BunshinCloneOptions,
+  ref?: Ref,
 ): unknown {
-  return clone(target, options ?? EMPTY_OPTIONS, new WeakMap());
+  return clone(target, options ?? EMPTY_OPTIONS, ref ?? new WeakMap());
 }
 
 // -----------------------------------------------------------------------------
@@ -258,7 +259,7 @@ function cloneError(
   return result;
 }
 
-function cloneWithDescriptors(
+export function cloneWithDescriptors(
   node: AnyObject,
   options: BunshinCloneOptions,
   ref: Ref,
