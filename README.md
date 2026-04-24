@@ -8,8 +8,6 @@ High-performance deep clone utility with descriptor support. Supports circular r
 * 🧠 Handles Map, Set, Array, TypedArray, Date, RegExp, etc.
 * 🧩 Optional descriptor preservation
 
----
-
 ## Usage
 
 ```ts
