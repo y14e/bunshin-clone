@@ -1,4 +1,4 @@
-# bunshin-clone
+# Bunshin Clone
 
 High-performance deep clone utility with descriptor support. Supports circular references and complex built-in types.
 
@@ -186,7 +186,7 @@ When `preserveDescriptors` is enabled:
 
 ## Comparison
 
-| Feature              | bunshin-clone | structuredClone | lodash.clonedeep |
+| Feature              | Bunshin Clone | structuredClone | lodash.clonedeep |
 |---------------------|--------------|----------------|------------------|
 | Circular refs       | ✅           | ✅             | ✅               |
 | Map / Set           | ✅           | ✅             | ⚠️ (partial)     |
