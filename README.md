@@ -4,9 +4,11 @@ High-performance deep clone utility with descriptor support. Supports circular r
 
 * ⚡ Fast (no unnecessary overhead)
 * ♻️ Deep clone (no structural sharing)
-* 🔁 Supports circular references
+* 🔁 Supports circular ref
 * 🧠 Handles Map, Set, Array, TypedArray, Date, RegExp, etc.
 * 🧩 Optional descriptor preservation
+
+---
 
 ## Usage
 
