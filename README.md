@@ -47,6 +47,9 @@ interface BunshinCloneOptions {
 * `false` (default): use standard merge (faster, ignores property descriptors)
 * `true`: preserve property descriptors (getters/setters, etc.)
 
+<details>
+<summary>Example</summary>
+
 ```ts
 const source = {};
 Object.defineProperty(source, 'x', {
@@ -59,11 +62,15 @@ const result = bunshinClone(source, { preserveDescriptors: true });
 Object.getOwnPropertyDescriptor(result, 'x')?.get;
 // => function
 ```
+</details>
 
 ### strictDescriptors
 
 * `false` (default): skip incompatible descriptors
 * `true`: throw if descriptor cannot be merged (e.g. non-configurable or non-writable)
+
+<details>
+<summary>Example</summary>
 
 ```ts
 Object.freeze(obj);
@@ -71,6 +78,7 @@ Object.freeze(obj);
 bunshinClone(obj, { strictDescriptors: true });
 // => may throw TypeError
 ```
+</details>
 
 ## Supported Types
 
