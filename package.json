@@ -1,6 +1,6 @@
 {
   "name": "bunshin-clone",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "High-performance deep clone utility with descriptor support",
   "type": "module",
   "main": "./dist/index.cjs",
