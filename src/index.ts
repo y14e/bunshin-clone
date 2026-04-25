@@ -3,7 +3,7 @@
  * High-performance deep clone utility with descriptor support.
  * Supports circular ref and complex built-in types.
  *
- * @version 1.0.3
+ * @version 1.0.4
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) 2026 Yusuke Kamiyamane
@@ -266,8 +266,8 @@ export function cloneWithDescriptors(
 ): AnyObject {
   const result = Object.create(Object.getPrototypeOf(node)) as AnyObject;
   ref.set(node, result); // [Ref.set]
-  const descriptors = Object.getOwnPropertyDescriptors(node);
-  const keys = Reflect.ownKeys(descriptors);
+  const descs = Object.getOwnPropertyDescriptors(node);
+  const keys = Reflect.ownKeys(descs);
 
   for (let i = 0, l = keys.length; i < l; i++) {
     const key = keys[i] as string | symbol;
@@ -276,14 +276,14 @@ export function cloneWithDescriptors(
       continue;
     }
 
-    const descriptor: PropertyDescriptor = { ...descriptors[key] };
+    const desc: PropertyDescriptor = { ...descs[key] };
 
-    if ('value' in descriptor) {
-      descriptor.value = clone(descriptor.value, options, ref);
+    if ('value' in desc) {
+      desc.value = clone(desc.value, options, ref);
     }
 
     try {
-      Object.defineProperty(result, key, descriptor);
+      Object.defineProperty(result, key, desc);
     } catch (error) {
       if (options.strictDescriptors) {
         throw error;
