@@ -3,7 +3,7 @@
  * High-performance deep clone utility with descriptor support.
  * Supports circular ref and complex built-in types.
  *
- * @version 1.0.10
+ * @version 1.0.11
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) 2026 Yusuke Kamiyamane
@@ -276,10 +276,6 @@ function cloneWithDescriptors(
   const descs = Object.getOwnPropertyDescriptors(node);
 
   forEachOwnKey(descs, (key) => {
-    if (!key) {
-      return;
-    }
-
     if (isUnsafeKey(key)) {
       return;
     }
@@ -317,13 +313,7 @@ function forEachOwnKey(
   const symbols = Object.getOwnPropertySymbols(object);
 
   for (let i = 0, l = symbols.length; i < l; i++) {
-    const symbol = symbols[i];
-
-    if (!symbol) {
-      continue;
-    }
-
-    callback(symbol);
+    callback(symbols[i] as symbol);
   }
 }
 
