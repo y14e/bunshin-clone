@@ -3,7 +3,7 @@
  * High-performance deep clone utility with descriptor support.
  * Supports circular ref and complex built-in types.
  *
- * @version 1.0.8
+ * @version 1.0.9
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) 2026 Yusuke Kamiyamane
@@ -29,7 +29,6 @@ type Ref = WeakMap<object, unknown>;
 
 const EMPTY_OPTIONS = {};
 const { hasOwnProperty: HAS_OWN } = Object.prototype;
-const { toString: OBJECT_TO_STRING } = Object.prototype;
 
 // -----------------------------------------------------------------------------
 // [API]
@@ -269,17 +268,14 @@ function cloneWithDescriptors(
   const result = Object.create(Object.getPrototypeOf(node));
   ref.set(node, result); // [Ref.set]
   const descs = Object.getOwnPropertyDescriptors(node);
-  const keys: PropertyKey[] = Reflect.ownKeys(descs);
 
-  for (let i = 0, l = keys.length; i < l; i++) {
-    const key = keys[i];
-
+  forEachOwnKey(descs, (key) => {
     if (!key) {
-      continue;
+      return;
     }
 
     if (isUnsafeKey(key)) {
-      continue;
+      return;
     }
 
     const desc = { ...descs[key] };
@@ -295,7 +291,7 @@ function cloneWithDescriptors(
         throw error;
       }
     }
-  }
+  });
 
   return result;
 }
@@ -304,12 +300,38 @@ function cloneWithDescriptors(
 // [Utils]
 // -----------------------------------------------------------------------------
 
+function forEachOwnKey(
+  object: object,
+  callback: (key: string | symbol) => void,
+) {
+  for (const key of Object.keys(object)) {
+    callback(key);
+  }
+
+  const symbols = Object.getOwnPropertySymbols(object);
+
+  for (let i = 0, l = symbols.length; i < l; i++) {
+    const symbol = symbols[i];
+
+    if (!symbol) {
+      continue;
+    }
+
+    callback(symbol);
+  }
+}
+
 function isObject(value: unknown) {
   return typeof value === 'object' && value !== null;
 }
 
 function isPlainObject(value: unknown) {
-  return OBJECT_TO_STRING.call(value) === '[object Object]';
+  if (value === null || typeof value !== 'object') {
+    return false;
+  }
+
+  const proto = Object.getPrototypeOf(value);
+  return proto === Object.prototype || proto === null;
 }
 
 function isUnsafeKey(key: PropertyKey) {
