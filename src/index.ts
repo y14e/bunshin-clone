@@ -3,7 +3,7 @@
  * High-performance deep clone utility with descriptor support.
  * Supports circular ref and complex built-in types.
  *
- * @version 1.0.7
+ * @version 1.0.8
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) 2026 Yusuke Kamiyamane
@@ -39,20 +39,20 @@ export default function bunshinClone<T>(
   source: T,
   options?: BunshinCloneOptions,
 ): T {
-  return clone(source, options ?? EMPTY_OPTIONS, new WeakMap()) as T;
+  return clone(source, options ?? EMPTY_OPTIONS, new WeakMap());
 }
 
 // -----------------------------------------------------------------------------
 // [Clone]
 // -----------------------------------------------------------------------------
 
-function clone(node: unknown, options: BunshinCloneOptions, ref: Ref): unknown {
+function clone(node: unknown, options: BunshinCloneOptions, ref: Ref) {
   if (!isObject(node)) {
     return node;
   }
 
   // [Ref]
-  const cached = ref.get(node as object);
+  const cached = ref.get(node);
 
   if (cached !== undefined) {
     return cached;
@@ -77,10 +77,10 @@ function clone(node: unknown, options: BunshinCloneOptions, ref: Ref): unknown {
 
   // Plain object
   if (isPlainObject(node)) {
-    const result = Object.create(Object.getPrototypeOf(node)) as Object;
-    ref.set(node as object, result); // [Ref.set]
+    const result = Object.create(Object.getPrototypeOf(node));
+    ref.set(node, result); // [Ref.set]
 
-    for (const key in node as object) {
+    for (const key in node) {
       if (!HAS_OWN.call(node, key) || isUnsafeKey(key)) {
         continue;
       }
@@ -161,9 +161,7 @@ function clone(node: unknown, options: BunshinCloneOptions, ref: Ref): unknown {
     node instanceof Error ||
     (typeof DOMException !== 'undefined' && node instanceof DOMException)
   ) {
-    const result = cloneError(node, options, ref);
-    ref.set(node, result); // [Ref.set]
-    return result;
+    return cloneError(node, options, ref);
   }
 
   // Blob
@@ -207,20 +205,29 @@ function clone(node: unknown, options: BunshinCloneOptions, ref: Ref): unknown {
   }
 
   // Fallback: unsupported types
-  ref.set(node as object, node); // [Ref.set]
+  ref.set(node, node); // [Ref.set]
   return node;
 }
 
 function cloneError(
-  value: Error,
+  value: Error | DOMException,
   options: BunshinCloneOptions,
   ref: Ref,
-): Error {
+): Error | DOMException {
+  if (value instanceof DOMException) {
+    const result = new DOMException(value.message, value.name);
+    ref.set(value, result); // [Ref.set]
+    return result;
+  }
+
   const name = value.name || 'Error';
   const message = value.message || '';
   let result: Error;
 
   switch (name) {
+    case 'EvalError':
+      result = new EvalError(message);
+      break;
     case 'RangeError':
       result = new RangeError(message);
       break;
@@ -233,29 +240,22 @@ function cloneError(
     case 'TypeError':
       result = new TypeError(message);
       break;
+    case 'URIError':
+      result = new URIError(message);
+      break;
     default:
       result = new Error(message);
       result.name = name;
   }
 
-  if (!options.preserveDescriptors && 'cause' in value) {
-    const cause = value.cause;
+  ref.set(value, result); // [Ref.set]
 
-    if (cause !== undefined) {
-      result.cause = clone(cause, options, ref);
-    }
+  if ('cause' in value && value.cause !== undefined) {
+    result.cause = clone(value.cause, options, ref);
   }
 
   if (value.stack) {
     result.stack = value.stack;
-  }
-
-  for (const key of Object.keys(value) as (keyof typeof value)[]) {
-    if (key === 'name' || key === 'message' || key === 'stack') {
-      continue;
-    }
-
-    result[key] = value[key];
   }
 
   return result;
@@ -265,20 +265,24 @@ function cloneWithDescriptors(
   node: Object,
   options: BunshinCloneOptions,
   ref: Ref,
-): Object {
-  const result = Object.create(Object.getPrototypeOf(node)) as Object;
+) {
+  const result = Object.create(Object.getPrototypeOf(node));
   ref.set(node, result); // [Ref.set]
   const descs = Object.getOwnPropertyDescriptors(node);
-  const keys = Reflect.ownKeys(descs);
+  const keys: PropertyKey[] = Reflect.ownKeys(descs);
 
   for (let i = 0, l = keys.length; i < l; i++) {
-    const key = keys[i] as PropertyKey;
+    const key = keys[i];
+
+    if (!key) {
+      continue;
+    }
 
     if (isUnsafeKey(key)) {
       continue;
     }
 
-    const desc: PropertyDescriptor = { ...descs[key] };
+    const desc = { ...descs[key] };
 
     if ('value' in desc) {
       desc.value = clone(desc.value, options, ref);
@@ -300,15 +304,15 @@ function cloneWithDescriptors(
 // [Utils]
 // -----------------------------------------------------------------------------
 
-function isObject(value: unknown): boolean {
+function isObject(value: unknown) {
   return typeof value === 'object' && value !== null;
 }
 
-function isPlainObject(value: unknown): boolean {
+function isPlainObject(value: unknown) {
   return OBJECT_TO_STRING.call(value) === '[object Object]';
 }
 
-function isUnsafeKey(key: PropertyKey): boolean {
+function isUnsafeKey(key: PropertyKey) {
   return (
     typeof key === 'string' &&
     (key === '__proto__' || key === 'prototype' || key === 'constructor')
