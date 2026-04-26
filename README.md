@@ -2,13 +2,27 @@
 
 High-performance deep clone utility with descriptor support. Supports circular references and complex built-in types.
 
-* ⚡ Fast (no unnecessary overhead)
-* ♻️ Deep clone (no structural sharing)
-* 🔁 Supports circular ref
-* 🧠 Handles Map, Set, Array, TypedArray, Date, RegExp, etc.
-* 🧩 Optional descriptor preservation
+* Fast (no unnecessary overhead)
+* Deep clone (no structural sharing)
+* Supports circular ref
+* Handles Map, Set, Array, TypedArray, Date, RegExp, etc.
+* Optional descriptor preservation
 
 ---
+
+## Install
+
+```bash
+npm i bunshin-clone
+```
+
+```ts
+// npm
+import bunshinClone from 'bunshin-clone';
+
+// CDN
+import bunshinClone from 'https://cdn.jsdelivr.net/npm/bunshin-clone/+esm';
+```
 
 ## Usage
 
@@ -36,15 +50,15 @@ bunshinClone(target, options)
 ## Options
 
 ```ts
-interface BunshinCloneOptions {
-  preserveDescriptors?: boolean;
-  strictDescriptors?: boolean;
+BunshinCloneOptions {
+  preserveDescriptors: false;
+  strictDescriptors: false;
 }
 ```
 
-### preserveDescriptors
+**preserveDescriptors**
 
-* `false` (default): use standard merge (faster, ignores property descriptors)
+* `false`: use standard merge (faster, ignores property descriptors)
 * `true`: preserve property descriptors (getters/setters, etc.)
 
 <details>
@@ -64,9 +78,9 @@ Object.getOwnPropertyDescriptor(result, 'x')?.get;
 ```
 </details>
 
-### strictDescriptors
+**strictDescriptors**
 
-* `false` (default): skip incompatible descriptors
+* `false`: skip incompatible descriptors
 * `true`: throw if descriptor cannot be merged (e.g. non-configurable or non-writable)
 
 <details>
@@ -79,6 +93,8 @@ bunshinClone(obj, { strictDescriptors: true });
 // => may throw TypeError
 ```
 </details>
+
+---
 
 ## Supported Types
 
