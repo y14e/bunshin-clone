@@ -3,7 +3,7 @@
  * High-performance deep clone utility with descriptor support.
  * Supports circular ref and complex built-in types.
  *
- * @version 1.0.9
+ * @version 1.0.10
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) 2026 Yusuke Kamiyamane
@@ -249,12 +249,18 @@ function cloneError(
 
   ref.set(value, result); // [Ref.set]
 
+  if (value.stack) {
+    try {
+      result.stack = value.stack;
+    } catch {}
+  }
+
   if ('cause' in value && value.cause !== undefined) {
     result.cause = clone(value.cause, options, ref);
   }
 
-  if (value.stack) {
-    result.stack = value.stack;
+  for (const key of Object.keys(value) as (keyof Error)[]) {
+    result[key] = clone(value[key], options, ref);
   }
 
   return result;
