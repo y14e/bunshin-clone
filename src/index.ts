@@ -139,6 +139,7 @@ function clone(node: unknown, options: BunshinCloneOptions, ref: Ref) {
   // DataView and TypedArray
   if (ArrayBuffer.isView(node)) {
     const { buffer, byteOffset, byteLength } = node;
+
     if (node instanceof DataView) {
       const result = new DataView(buffer.slice(0), byteOffset, byteLength);
       ref.set(node, result); // [Ref.set]
