@@ -20,8 +20,12 @@ npm i bunshin-clone
 // npm
 import bunshinClone from 'bunshin-clone';
 
-// CDN
+// CDNs
+import bunshinClone from 'https://esm.sh/bunshin-clone'
+// or
 import bunshinClone from 'https://cdn.jsdelivr.net/npm/bunshin-clone/+esm';
+// or
+import bunshinClone from 'https://unpkg.com/bunshin-clone/dist/index.js';
 ```
 
 ## Usage
