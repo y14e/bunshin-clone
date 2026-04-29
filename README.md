@@ -31,22 +31,11 @@ import bunshinClone from 'https://unpkg.com/bunshin-clone/dist/index.js';
 ## Usage
 
 ```ts
-const source = { foo: 1, nested: { x: 1 } };
-
-const result = bunshinClone(source);
-
-console.log(result);
-// { foo: 1, nested: { x: 1 } }
-
-console.log(result === source); // false
-console.log(result.nested === source.nested); // false
-```
-
-## API
-
-```ts
-bunshinClone(target)
-bunshinClone(target, options)
+bunshinClone(source, options);
+// => T
+//
+// source: T
+// options (optional): BunshinCloneOptions
 ```
 
 ### 🪄 Options
@@ -97,6 +86,20 @@ bunshinClone(obj, { strictDescriptors: true });
 </details>
 
 ---
+
+## Example
+
+```ts
+const source = { foo: 1, nested: { x: 1 } };
+
+const result = bunshinClone(source);
+
+console.log(result);
+// { foo: 1, nested: { x: 1 } }
+
+console.log(result === source); // false
+console.log(result.nested === source.nested); // false
+```
 
 ## Supported Types
 
