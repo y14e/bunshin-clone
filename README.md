@@ -31,8 +31,6 @@ import bunshinClone from 'https://unpkg.com/bunshin-clone/dist/index.js';
 ## Usage
 
 ```ts
-import bunshinClone from 'bunshin-clone';
-
 const source = { foo: 1, nested: { x: 1 } };
 
 const result = bunshinClone(source);
