@@ -1,9 +1,9 @@
 /**
  * Bunshin Clone
  * High-performance deep clone utility with descriptor support.
- * Supports circular ref and complex built-in types.
+ * Handles circular ref and complex built-in types.
  *
- * @version 1.0.11
+ * @version 1.0.12
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) 2026 Yusuke Kamiyamane
@@ -303,18 +303,15 @@ function cloneWithDescriptors(
 // [Utils]
 // -----------------------------------------------------------------------------
 
-function forEachOwnKey(
-  object: object,
-  callback: (key: string | symbol) => void,
-) {
+function forEachOwnKey(object: object, fn: (key: string | symbol) => void) {
   for (const key of Object.keys(object)) {
-    callback(key);
+    fn(key);
   }
 
   const symbols = Object.getOwnPropertySymbols(object);
 
   for (let i = 0, l = symbols.length; i < l; i++) {
-    callback(symbols[i] as symbol);
+    fn(symbols[i] as symbol);
   }
 }
 
