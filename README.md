@@ -49,12 +49,12 @@ bunshinClone(target)
 bunshinClone(target, options)
 ```
 
-## Options
+### 🪄 Options
 
 ```ts
-BunshinCloneOptions {
-  preserveDescriptors: false;
-  strictDescriptors: false;
+interface BunshinCloneOptions {
+  preserveDescriptors?: boolean; // (default: false)
+  strictDescriptors?: boolean;   // (default: false)
 }
 ```
 
