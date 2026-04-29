@@ -1,6 +1,6 @@
 # Bunshin Clone
 
-High-performance deep clone utility with descriptor support. Supports circular references and complex built-in types.
+High-performance deep clone utility with descriptor support. Handles circular ref and complex built-in types.
 
 * Fast (no unnecessary overhead)
 * Deep clone (no structural sharing)
@@ -20,15 +20,17 @@ npm i bunshin-clone
 // npm
 import bunshinClone from 'bunshin-clone';
 
-// CDN
+// CDNs
+import bunshinClone from 'https://esm.sh/bunshin-clone'
+// or
 import bunshinClone from 'https://cdn.jsdelivr.net/npm/bunshin-clone/+esm';
+// or
+import bunshinClone from 'https://unpkg.com/bunshin-clone/dist/index.js';
 ```
 
 ## Usage
 
 ```ts
-import bunshinClone from 'bunshin-clone';
-
 const source = { foo: 1, nested: { x: 1 } };
 
 const result = bunshinClone(source);
