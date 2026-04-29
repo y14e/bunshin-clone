@@ -1,6 +1,6 @@
 # Bunshin Clone
 
-High-performance deep clone utility with descriptor support. Handles circular references and complex built-in types.
+High-performance deep clone utility with descriptor support. Handles circular ref and complex built-in types.
 
 * Fast (no unnecessary overhead)
 * Deep clone (no structural sharing)
