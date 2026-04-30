@@ -3,7 +3,7 @@
  * High-performance deep clone utility with descriptor support.
  * Handles circular ref and complex built-in types.
  *
- * @version 1.0.12
+ * @version 1.0.13
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) 2026 Yusuke Kamiyamane
@@ -21,7 +21,7 @@ export interface BunshinCloneOptions {
 
 type Object = Record<PropertyKey, unknown>;
 
-type Ref = WeakMap<object, unknown>;
+type Refs = WeakMap<object, unknown>;
 
 // -----------------------------------------------------------------------------
 // [Constants]
@@ -45,30 +45,30 @@ export default function bunshinClone<T>(
 // [Clone]
 // -----------------------------------------------------------------------------
 
-function clone(node: unknown, options: BunshinCloneOptions, ref: Ref) {
+function clone(node: unknown, options: BunshinCloneOptions, refs: Refs) {
   if (!isObject(node)) {
     return node;
   }
 
-  // [Ref]
-  const cached = ref.get(node);
+  // [Refs]
+  const ref = refs.get(node);
 
-  if (cached !== undefined) {
-    return cached;
+  if (ref !== undefined) {
+    return ref;
   }
 
   // With descriptors
   if (options.preserveDescriptors && isPlainObject(node)) {
-    return cloneWithDescriptors(node as Object, options, ref);
+    return cloneWithDescriptors(node as Object, options, refs);
   }
 
   // Array
   if (Array.isArray(node)) {
     const result: unknown[] = [];
-    ref.set(node, result); // [Ref.set]
+    refs.set(node, result); // [Refs.set]
 
     for (let i = 0, l = node.length; i < l; i++) {
-      result[i] = clone(node[i], options, ref);
+      result[i] = clone(node[i], options, refs);
     }
 
     return result;
@@ -77,14 +77,14 @@ function clone(node: unknown, options: BunshinCloneOptions, ref: Ref) {
   // Plain object
   if (isPlainObject(node)) {
     const result = Object.create(Object.getPrototypeOf(node));
-    ref.set(node, result); // [Ref.set]
+    refs.set(node, result); // [Refs.set]
 
     for (const key in node) {
       if (!HAS_OWN.call(node, key) || isUnsafeKey(key)) {
         continue;
       }
 
-      result[key] = clone((node as Object)[key], options, ref);
+      result[key] = clone((node as Object)[key], options, refs);
     }
 
     return result;
@@ -93,10 +93,10 @@ function clone(node: unknown, options: BunshinCloneOptions, ref: Ref) {
   // Map
   if (node instanceof Map) {
     const result = new Map();
-    ref.set(node, result); // [Ref.set]
+    refs.set(node, result); // [Refs.set]
 
     for (const [key, value] of node) {
-      result.set(clone(key, options, ref), clone(value, options, ref));
+      result.set(clone(key, options, refs), clone(value, options, refs));
     }
 
     return result;
@@ -105,10 +105,10 @@ function clone(node: unknown, options: BunshinCloneOptions, ref: Ref) {
   // Set
   if (node instanceof Set) {
     const result = new Set();
-    ref.set(node, result); // [Ref.set]
+    refs.set(node, result); // [Refs.set]
 
     for (const item of node) {
-      result.add(clone(item, options, ref));
+      result.add(clone(item, options, refs));
     }
 
     return result;
@@ -117,14 +117,14 @@ function clone(node: unknown, options: BunshinCloneOptions, ref: Ref) {
   // Date
   if (node instanceof Date) {
     const result = new Date(node.getTime());
-    ref.set(node, result); // [Ref.set]
+    refs.set(node, result); // [Refs.set]
     return result;
   }
 
   // RegExp
   if (node instanceof RegExp) {
     const result = new RegExp(node.source, node.flags);
-    ref.set(node, result); // [Ref.set]
+    refs.set(node, result); // [Refs.set]
     result.lastIndex = node.lastIndex;
     return result;
   }
@@ -132,7 +132,7 @@ function clone(node: unknown, options: BunshinCloneOptions, ref: Ref) {
   // ArrayBuffer
   if (node instanceof ArrayBuffer) {
     const result = node.slice(0);
-    ref.set(node, result); // [Ref.set]
+    refs.set(node, result); // [Refs.set]
     return result;
   }
 
@@ -142,7 +142,7 @@ function clone(node: unknown, options: BunshinCloneOptions, ref: Ref) {
 
     if (node instanceof DataView) {
       const result = new DataView(buffer.slice(0), byteOffset, byteLength);
-      ref.set(node, result); // [Ref.set]
+      refs.set(node, result); // [Refs.set]
       return result;
     } else {
       const Ctor = node.constructor as new (
@@ -151,7 +151,7 @@ function clone(node: unknown, options: BunshinCloneOptions, ref: Ref) {
       const result = new Ctor(
         buffer.slice(byteOffset, byteOffset + byteLength),
       );
-      ref.set(node, result); // [Ref.set]
+      refs.set(node, result); // [Refs.set]
       return result;
     }
   }
@@ -161,13 +161,13 @@ function clone(node: unknown, options: BunshinCloneOptions, ref: Ref) {
     node instanceof Error ||
     (typeof DOMException !== 'undefined' && node instanceof DOMException)
   ) {
-    return cloneError(node, options, ref);
+    return cloneError(node, options, refs);
   }
 
   // Blob
   if (typeof Blob !== 'undefined' && node instanceof Blob) {
     const result = node.slice(0, node.size, node.type);
-    ref.set(node, result); // [Ref.set]
+    refs.set(node, result); // [Refs.set]
     return result;
   }
 
@@ -178,14 +178,14 @@ function clone(node: unknown, options: BunshinCloneOptions, ref: Ref) {
       node.width,
       node.height,
     );
-    ref.set(node, result); // [Ref.set]
+    refs.set(node, result); // [Refs.set]
     return result;
   }
 
   // URL
   if (typeof URL !== 'undefined' && node instanceof URL) {
     const result = new URL(node.href);
-    ref.set(node, result); // [Ref.set]
+    refs.set(node, result); // [Refs.set]
     return result;
   }
 
@@ -195,7 +195,7 @@ function clone(node: unknown, options: BunshinCloneOptions, ref: Ref) {
     node instanceof URLSearchParams
   ) {
     const result = new URLSearchParams();
-    ref.set(node, result); // [Ref.set]
+    refs.set(node, result); // [Refs.set]
 
     for (const [key, value] of node) {
       result.append(key, value);
@@ -205,18 +205,18 @@ function clone(node: unknown, options: BunshinCloneOptions, ref: Ref) {
   }
 
   // Fallback: unsupported types
-  ref.set(node, node); // [Ref.set]
+  refs.set(node, node); // [Refs.set]
   return node;
 }
 
 function cloneError(
   value: Error | DOMException,
   options: BunshinCloneOptions,
-  ref: Ref,
+  refs: Refs,
 ): Error | DOMException {
   if (value instanceof DOMException) {
     const result = new DOMException(value.message, value.name);
-    ref.set(value, result); // [Ref.set]
+    refs.set(value, result); // [Refs.set]
     return result;
   }
 
@@ -248,7 +248,7 @@ function cloneError(
       result.name = name;
   }
 
-  ref.set(value, result); // [Ref.set]
+  refs.set(value, result); // [Refs.set]
 
   if (value.stack) {
     try {
@@ -257,11 +257,11 @@ function cloneError(
   }
 
   if ('cause' in value && value.cause !== undefined) {
-    result.cause = clone(value.cause, options, ref);
+    result.cause = clone(value.cause, options, refs);
   }
 
   for (const key of Object.keys(value) as (keyof Error)[]) {
-    result[key] = clone(value[key], options, ref);
+    result[key] = clone(value[key], options, refs);
   }
 
   return result;
@@ -270,10 +270,10 @@ function cloneError(
 function cloneWithDescriptors(
   node: Object,
   options: BunshinCloneOptions,
-  ref: Ref,
+  refs: Refs,
 ) {
   const result = Object.create(Object.getPrototypeOf(node));
-  ref.set(node, result); // [Ref.set]
+  refs.set(node, result); // [Refs.set]
   const descs = Object.getOwnPropertyDescriptors(node);
 
   forEachOwnKey(descs, (key) => {
@@ -284,7 +284,7 @@ function cloneWithDescriptors(
     const desc = { ...descs[key] };
 
     if ('value' in desc) {
-      desc.value = clone(desc.value, options, ref);
+      desc.value = clone(desc.value, options, refs);
     }
 
     try {
