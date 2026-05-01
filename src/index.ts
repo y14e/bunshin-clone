@@ -3,7 +3,7 @@
  * High-performance deep clone utility with descriptor support.
  * Handles circular ref and complex built-in types.
  *
- * @version 1.0.13
+ * @version 1.1.0
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) 2026 Yusuke Kamiyamane
@@ -140,20 +140,20 @@ function clone(node: unknown, options: BunshinCloneOptions, refs: Refs) {
   if (ArrayBuffer.isView(node)) {
     const { buffer, byteOffset, byteLength } = node;
 
+    // DataView
     if (node instanceof DataView) {
       const result = new DataView(buffer.slice(0), byteOffset, byteLength);
       refs.set(node, result); // [Refs.set]
       return result;
-    } else {
-      const Ctor = node.constructor as new (
-        buffer: ArrayBufferLike,
-      ) => ArrayBufferView;
-      const result = new Ctor(
-        buffer.slice(byteOffset, byteOffset + byteLength),
-      );
-      refs.set(node, result); // [Refs.set]
-      return result;
     }
+
+    // TypedArray
+    const Ctor = node.constructor as new (
+      buffer: ArrayBufferLike,
+    ) => ArrayBufferView;
+    const result = new Ctor(buffer.slice(byteOffset, byteOffset + byteLength));
+    refs.set(node, result); // [Refs.set]
+    return result;
   }
 
   // Error and DOMException
@@ -214,12 +214,14 @@ function cloneError(
   options: BunshinCloneOptions,
   refs: Refs,
 ): Error | DOMException {
+  // DOMException
   if (value instanceof DOMException) {
     const result = new DOMException(value.message, value.name);
     refs.set(value, result); // [Refs.set]
     return result;
   }
 
+  // Error
   const name = value.name || 'Error';
   const message = value.message || '';
   let result: Error;
