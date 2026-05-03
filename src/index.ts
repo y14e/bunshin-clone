@@ -31,7 +31,7 @@ const EMPTY_OPTIONS = {};
 const { hasOwnProperty: HAS_OWN } = Object.prototype;
 
 // -----------------------------------------------------------------------------
-// [API]
+// [APIs]
 // -----------------------------------------------------------------------------
 
 export default function bunshinClone<T>(
@@ -42,7 +42,7 @@ export default function bunshinClone<T>(
 }
 
 // -----------------------------------------------------------------------------
-// [Clone]
+// [Core]
 // -----------------------------------------------------------------------------
 
 function clone(node: unknown, options: BunshinCloneOptions, refs: Refs) {
