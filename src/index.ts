@@ -3,10 +3,10 @@
  * High-performance deep clone utility with descriptor support.
  * Handles circular ref and complex built-in types.
  *
- * @version 1.1.0
+ * @version 1.2.0
  * @author Yusuke Kamiyamane
  * @license MIT
- * @copyright Copyright (c) 2026 Yusuke Kamiyamane
+ * @copyright Copyright (c) Yusuke Kamiyamane
  * @see {@link https://github.com/y14e/bunshin-clone}
  */
 
@@ -39,6 +39,38 @@ export default function bunshinClone<T>(
   options?: BunshinCloneOptions,
 ): T {
   return clone(source, options ?? EMPTY_OPTIONS, new WeakMap());
+}
+
+export function cloneWithDescriptors<T extends Object>(
+  node: T,
+  options: BunshinCloneOptions,
+  refs: Refs,
+): T {
+  const result = Object.create(Object.getPrototypeOf(node));
+  refs.set(node, result); // [Refs.set]
+  const descs = Object.getOwnPropertyDescriptors(node);
+
+  forEachOwnKey(descs, (key) => {
+    if (isUnsafeKey(key)) {
+      return;
+    }
+
+    const desc = { ...descs[key] };
+
+    if ('value' in desc) {
+      desc.value = clone(desc.value, options, refs);
+    }
+
+    try {
+      Object.defineProperty(result, key, desc);
+    } catch (error) {
+      if (options.strictDescriptors) {
+        throw error;
+      }
+    }
+  });
+
+  return result;
 }
 
 // -----------------------------------------------------------------------------
@@ -265,38 +297,6 @@ function cloneError(
   for (const key of Object.keys(value) as (keyof Error)[]) {
     result[key] = clone(value[key], options, refs);
   }
-
-  return result;
-}
-
-function cloneWithDescriptors(
-  node: Object,
-  options: BunshinCloneOptions,
-  refs: Refs,
-) {
-  const result = Object.create(Object.getPrototypeOf(node));
-  refs.set(node, result); // [Refs.set]
-  const descs = Object.getOwnPropertyDescriptors(node);
-
-  forEachOwnKey(descs, (key) => {
-    if (isUnsafeKey(key)) {
-      return;
-    }
-
-    const desc = { ...descs[key] };
-
-    if ('value' in desc) {
-      desc.value = clone(desc.value, options, refs);
-    }
-
-    try {
-      Object.defineProperty(result, key, desc);
-    } catch (error) {
-      if (options.strictDescriptors) {
-        throw error;
-      }
-    }
-  });
 
   return result;
 }
