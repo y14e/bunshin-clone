@@ -3,7 +3,7 @@
  * High-performance deep clone utility with descriptor support.
  * Handles circular ref and complex built-in types.
  *
- * @version 1.2.0
+ * @version 1.2.1
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) Yusuke Kamiyamane
@@ -37,40 +37,9 @@ const { hasOwnProperty: HAS_OWN } = Object.prototype;
 export default function bunshinClone<T>(
   source: T,
   options?: BunshinCloneOptions,
+  refs?: Refs,
 ): T {
-  return clone(source, options ?? EMPTY_OPTIONS, new WeakMap());
-}
-
-export function cloneWithDescriptors<T extends Object>(
-  node: T,
-  options: BunshinCloneOptions,
-  refs: Refs,
-): T {
-  const result = Object.create(Object.getPrototypeOf(node));
-  refs.set(node, result); // [Refs.set]
-  const descs = Object.getOwnPropertyDescriptors(node);
-
-  forEachOwnKey(descs, (key) => {
-    if (isUnsafeKey(key)) {
-      return;
-    }
-
-    const desc = { ...descs[key] };
-
-    if ('value' in desc) {
-      desc.value = clone(desc.value, options, refs);
-    }
-
-    try {
-      Object.defineProperty(result, key, desc);
-    } catch (error) {
-      if (options.strictDescriptors) {
-        throw error;
-      }
-    }
-  });
-
-  return result;
+  return clone(source, options ?? EMPTY_OPTIONS, refs ?? new WeakMap());
 }
 
 // -----------------------------------------------------------------------------
@@ -297,6 +266,38 @@ function cloneError(
   for (const key of Object.keys(value) as (keyof Error)[]) {
     result[key] = clone(value[key], options, refs);
   }
+
+  return result;
+}
+
+function cloneWithDescriptors(
+  node: Object,
+  options: BunshinCloneOptions,
+  refs: Refs,
+) {
+  const result = Object.create(Object.getPrototypeOf(node));
+  refs.set(node, result); // [Refs.set]
+  const descs = Object.getOwnPropertyDescriptors(node);
+
+  forEachOwnKey(descs, (key) => {
+    if (isUnsafeKey(key)) {
+      return;
+    }
+
+    const desc = { ...descs[key] };
+
+    if ('value' in desc) {
+      desc.value = clone(desc.value, options, refs);
+    }
+
+    try {
+      Object.defineProperty(result, key, desc);
+    } catch (error) {
+      if (options.strictDescriptors) {
+        throw error;
+      }
+    }
+  });
 
   return result;
 }
