@@ -2,14 +2,6 @@
 
 High-performance deep clone utility with descriptor support. Handles circular ref and complex built-in types.
 
-* Fast (no unnecessary overhead)
-* Deep clone (no structural sharing)
-* Supports circular ref
-* Handles Map, Set, Array, TypedArray, Date, RegExp, etc.
-* Optional descriptor preservation
-
----
-
 ## Install
 
 ```bash
@@ -28,7 +20,7 @@ import bunshinClone from 'https://cdn.jsdelivr.net/npm/bunshin-clone/+esm';
 import bunshinClone from 'https://unpkg.com/bunshin-clone/dist/index.js';
 ```
 
-## Usage
+## 📦 APIs
 
 ```ts
 bunshinClone(source, options);
@@ -38,7 +30,7 @@ bunshinClone(source, options);
 // options (optional): BunshinCloneOptions
 ```
 
-### 🪄 Options
+## 🪄 Options
 
 ```ts
 interface BunshinCloneOptions {
@@ -47,47 +39,20 @@ interface BunshinCloneOptions {
 }
 ```
 
-**preserveDescriptors**
+### `preserveDescriptors`
 
-* `false`: use standard merge (faster, ignores property descriptors)
-* `true`: preserve property descriptors (getters/setters, etc.)
+If `true`, preserves property descriptors (getters/setters, etc.).
 
-<details>
-<summary>Example</summary>
+### `strictDescriptors`
 
-```ts
-const source = {};
-Object.defineProperty(source, 'x', {
-  get: () => 42,
-  enumerable: true,
-});
+If `true`, throws if descriptor cannot be merged (e.g. non-configurable or non-writable)
 
-const result = bunshinClone(source, { preserveDescriptors: true });
-
-Object.getOwnPropertyDescriptor(result, 'x')?.get;
-// => function
-```
-</details>
-
-**strictDescriptors**
-
-* `false`: skip incompatible descriptors
-* `true`: throw if descriptor cannot be merged (e.g. non-configurable or non-writable)
+## 📖 Details
 
 <details>
-<summary>Example</summary>
+<summary>Read more</summary>
 
-```ts
-Object.freeze(obj);
-
-bunshinClone(obj, { strictDescriptors: true });
-// => may throw TypeError
-```
-</details>
-
----
-
-## Example
+### Example
 
 ```ts
 const source = { foo: 1, nested: { x: 1 } };
@@ -101,7 +66,7 @@ console.log(result === source); // false
 console.log(result.nested === source.nested); // false
 ```
 
-## Supported Types
+### Supported Types
 
 bunshin-clone correctly handles:
 
@@ -120,7 +85,7 @@ bunshin-clone correctly handles:
 * URL
 * URLSearchParams
 
-## Circular ref
+### Circular ref
 
 ```ts
 const a: any = { x: 1 };
@@ -131,9 +96,9 @@ const result = bunshinClone(a);
 result.self === result; // true
 ```
 
-## Descriptor Behavior
+### Descriptor Behavior
 
-### Default (fast path)
+#### Default (fast path)
 
 ```ts
 const source = {
@@ -148,7 +113,7 @@ result.x; // 42
 // getter is NOT preserved
 ```
 
-### preserveDescriptors: true
+#### preserveDescriptors: true
 
 ```ts
 const source = {};
@@ -165,7 +130,7 @@ Object.getOwnPropertyDescriptor(result, 'x')?.get;
 // => preserved
 ```
 
-### Unsupported / Pass-through Types
+#### Unsupported / Pass-through Types
 
 Some values are returned as-is:
 
@@ -180,9 +145,9 @@ const fn = () => {};
 bunshinClone(fn) === fn; // true
 ```
 
-## Design Notes
+### Design Notes
 
-### Deep clone (no structural sharing)
+#### Deep clone (no structural sharing)
 
 Unlike merge utilities, bunshin-clone always produces a new structure:
 
@@ -195,12 +160,12 @@ result !== source; // true
 result.a !== source.a; // true
 ```
 
-### Getter / Setter behavior
+#### Getter / Setter behavior
 
 * Default: evaluated and converted to value
 * preserveDescriptors: preserved as-is
 
-### Descriptor safety
+#### Descriptor safety
 
 When `preserveDescriptors` is enabled:
 
@@ -208,14 +173,14 @@ When `preserveDescriptors` is enabled:
 * original object is never mutated
 * errors are controlled via `strictDescriptors`
 
-## Performance
+### Performance
 
 * No proxy / no diffing
 * Minimal branching
 * Fast path for plain objects and arrays
 * Competitive with structuredClone in many cases
 
-## Comparison
+### Comparison
 
 | Feature              | Bunshin Clone | structuredClone | lodash.clonedeep |
 |---------------------|--------------|----------------|------------------|
@@ -227,3 +192,5 @@ When `preserveDescriptors` is enabled:
 | Prototype preserved | ✅           | ❌             | ⚠️               |
 | Custom control      | ✅           | ❌             | ❌               |
 | Performance         | ⚡ fast       | ⚡ fast         | 🐢 slower        |
+
+</details>
