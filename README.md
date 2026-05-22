@@ -34,8 +34,8 @@ bunshinClone(source, options);
 
 ```ts
 interface BunshinCloneOptions {
-  preserveDescriptors?: boolean; // (default: false)
-  strictDescriptors?: boolean;   // (default: false)
+  preserveDescriptors?: boolean; // default: false
+  strictDescriptors?: boolean;   // default: false
 }
 ```
 
