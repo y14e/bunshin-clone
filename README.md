@@ -47,7 +47,7 @@ If `true`, preserves property descriptors (getters/setters, etc.).
 
 If `true`, throws if descriptor cannot be merged (e.g. non-configurable or non-writable)
 
-## 🧠 Details
+## 📖 Details
 
 <details>
 <summary>Read more</summary>
