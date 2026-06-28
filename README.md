@@ -10,14 +10,14 @@ npm i bunshin-clone
 
 ```ts
 // npm
-import bunshinClone from 'bunshin-clone@1.2.2';
+import bunshinClone from 'bunshin-clone';
 
 // CDNs
-import bunshinClone from 'https://esm.sh/bunshin-clone@1.2.2';
+import bunshinClone from 'https://esm.sh/bunshin-clone@1.2.3';
 // or
-import bunshinClone from 'https://cdn.jsdelivr.net/npm/bunshin-clone@1.2.2/+esm';
+import bunshinClone from 'https://cdn.jsdelivr.net/npm/bunshin-clone@1.2.3/+esm';
 // or
-import bunshinClone from 'https://esm.unpkg.com/bunshin-clone@1.2.2';
+import bunshinClone from 'https://esm.unpkg.com/bunshin-clone@1.2.3';
 ```
 
 ## 📦 APIs
