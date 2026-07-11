@@ -13,11 +13,11 @@ npm i bunshin-clone
 import bunshinClone from 'bunshin-clone';
 
 // CDNs
-import bunshinClone from 'https://esm.sh/bunshin-clone@1.2.3';
+import bunshinClone from 'https://esm.sh/bunshin-clone@1.2.4';
 // or
-import bunshinClone from 'https://cdn.jsdelivr.net/npm/bunshin-clone@1.2.3/+esm';
+import bunshinClone from 'https://cdn.jsdelivr.net/npm/bunshin-clone@1.2.4/+esm';
 // or
-import bunshinClone from 'https://esm.unpkg.com/bunshin-clone@1.2.3';
+import bunshinClone from 'https://esm.unpkg.com/bunshin-clone@1.2.4';
 ```
 
 ## 📦 APIs
@@ -34,8 +34,8 @@ bunshinClone(source, options);
 
 ```ts
 interface BunshinCloneOptions {
-  preserveDescriptors?: boolean; // default: false
-  strictDescriptors?: boolean;   // default: false
+  preserveDescriptors: boolean; // default: false
+  strictDescriptors: boolean;   // default: false
 }
 ```
 

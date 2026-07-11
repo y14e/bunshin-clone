@@ -3,7 +3,7 @@
  * High-performance deep clone utility with descriptor support.
  * Handles circular ref and complex built-in types.
  *
- * @version 1.2.3
+ * @version 1.2.4
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) Yusuke Kamiyamane
@@ -15,8 +15,8 @@
 // -----------------------------------------------------------------------------
 
 export interface BunshinCloneOptions {
-  readonly preserveDescriptors?: boolean;
-  readonly strictDescriptors?: boolean;
+  preserveDescriptors: boolean;
+  strictDescriptors: boolean;
 }
 
 type Object = Record<PropertyKey, unknown>;
@@ -36,17 +36,21 @@ const { hasOwnProperty: HAS_OWN } = Object.prototype;
 
 export default function bunshinClone<T>(
   source: T,
-  options?: BunshinCloneOptions,
-  refs?: Refs,
+  options: Partial<BunshinCloneOptions> = EMPTY_OPTIONS,
+  refs: Refs = new WeakMap(),
 ): T {
-  return clone(source, options ?? EMPTY_OPTIONS, refs ?? new WeakMap());
+  return clone(source, options, refs);
 }
 
 // -----------------------------------------------------------------------------
 // Core
 // -----------------------------------------------------------------------------
 
-function clone(node: unknown, options: BunshinCloneOptions, refs: Refs) {
+function clone(
+  node: unknown,
+  options: Partial<BunshinCloneOptions>,
+  refs: Refs,
+) {
   if (!isObject(node)) {
     return node;
   }
@@ -212,7 +216,7 @@ function clone(node: unknown, options: BunshinCloneOptions, refs: Refs) {
 
 function cloneError(
   value: Error | DOMException,
-  options: BunshinCloneOptions,
+  options: Partial<BunshinCloneOptions>,
   refs: Refs,
 ): Error | DOMException {
   // DOMException
@@ -272,7 +276,7 @@ function cloneError(
 
 function cloneWithDescriptors(
   node: Object,
-  options: BunshinCloneOptions,
+  options: Partial<BunshinCloneOptions>,
   refs: Refs,
 ) {
   const result = Object.create(Object.getPrototypeOf(node));
