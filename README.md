@@ -13,11 +13,11 @@ npm i bunshin-clone
 import bunshinClone from 'bunshin-clone';
 
 // CDNs
-import bunshinClone from 'https://esm.sh/bunshin-clone@1.2.4';
+import bunshinClone from 'https://esm.sh/bunshin-clone@1.2.5';
 // or
-import bunshinClone from 'https://cdn.jsdelivr.net/npm/bunshin-clone@1.2.4/+esm';
+import bunshinClone from 'https://cdn.jsdelivr.net/npm/bunshin-clone@1.2.5/+esm';
 // or
-import bunshinClone from 'https://esm.unpkg.com/bunshin-clone@1.2.4';
+import bunshinClone from 'https://esm.unpkg.com/bunshin-clone@1.2.5';
 ```
 
 ## 📦 APIs
@@ -70,20 +70,20 @@ console.log(result.nested === source.nested); // false
 
 bunshin-clone correctly handles:
 
-* Object (plain + prototype preserved)
-* Array
-* Map
-* Set
-* Date
-* RegExp
-* ArrayBuffer
-* DataView
-* TypedArray (Uint8Array, etc.)
-* Error / DOMException
-* Blob
-* ImageData
-* URL
-* URLSearchParams
+- Object (plain + prototype preserved)
+- Array
+- Map
+- Set
+- Date
+- RegExp
+- ArrayBuffer
+- DataView
+- TypedArray (Uint8Array, etc.)
+- Error / DOMException
+- Blob
+- ImageData
+- URL
+- URLSearchParams
 
 ### Circular ref
 
@@ -134,10 +134,10 @@ Object.getOwnPropertyDescriptor(result, 'x')?.get;
 
 Some values are returned as-is:
 
-* Function
-* WeakMap / WeakSet
-* Proxy (not cloned)
-* Other non-cloneable host objects
+- Function
+- WeakMap / WeakSet
+- Proxy (not cloned)
+- Other non-cloneable host objects
 
 ```ts
 const fn = () => {};
@@ -162,35 +162,35 @@ result.a !== source.a; // true
 
 #### Getter / Setter behavior
 
-* Default: evaluated and converted to value
-* preserveDescriptors: preserved as-is
+- Default: evaluated and converted to value
+- preserveDescriptors: preserved as-is
 
 #### Descriptor safety
 
 When `preserveDescriptors` is enabled:
 
-* descriptors are cloned safely
-* original object is never mutated
-* errors are controlled via `strictDescriptors`
+- descriptors are cloned safely
+- original object is never mutated
+- errors are controlled via `strictDescriptors`
 
 ### Performance
 
-* No proxy / no diffing
-* Minimal branching
-* Fast path for plain objects and arrays
-* Competitive with structuredClone in many cases
+- No proxy / no diffing
+- Minimal branching
+- Fast path for plain objects and arrays
+- Competitive with structuredClone in many cases
 
 ### Comparison
 
-| Feature              | Bunshin Clone | structuredClone | lodash.clonedeep |
-|---------------------|--------------|----------------|------------------|
-| Circular refs       | ✅           | ✅             | ✅               |
-| Map / Set           | ✅           | ✅             | ⚠️ (partial)     |
-| TypedArray          | ✅           | ✅             | ⚠️ (shallow)     |
-| Descriptor support  | ✅           | ❌             | ❌               |
-| Functions           | pass-through | ❌ (throws)    | pass-through     |
-| Prototype preserved | ✅           | ❌             | ⚠️               |
-| Custom control      | ✅           | ❌             | ❌               |
+| Feature             | Bunshin Clone | structuredClone | lodash.clonedeep |
+| ------------------- | ------------- | --------------- | ---------------- |
+| Circular refs       | ✅            | ✅              | ✅               |
+| Map / Set           | ✅            | ✅              | ⚠️ (partial)     |
+| TypedArray          | ✅            | ✅              | ⚠️ (shallow)     |
+| Descriptor support  | ✅            | ❌              | ❌               |
+| Functions           | pass-through  | ❌ (throws)     | pass-through     |
+| Prototype preserved | ✅            | ❌              | ⚠️               |
+| Custom control      | ✅            | ❌              | ❌               |
 | Performance         | ⚡ fast       | ⚡ fast         | 🐢 slower        |
 
 </details>

@@ -3,7 +3,7 @@
  * High-performance deep clone utility with descriptor support.
  * Handles circular ref and complex built-in types.
  *
- * @version 1.2.4
+ * @version 1.2.5
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) Yusuke Kamiyamane
