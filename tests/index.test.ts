@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import bunshinClone from '../src/index';
+import { bunshinClone } from '../src/index';
 
 describe('bunshinClone', () => {
   test('primitive values: return as-is', () => {
@@ -139,8 +139,8 @@ describe('bunshinClone', () => {
   test('preserveDescriptors', () => {
     const source = {};
     Object.defineProperty(source, 'x', {
-      get: () => 42,
       enumerable: true,
+      get: () => 42,
     });
 
     const result = bunshinClone(source, { preserveDescriptors: true });
