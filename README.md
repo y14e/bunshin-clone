@@ -13,11 +13,11 @@ npm i bunshin-clone
 import { bunshinClone } from 'bunshin-clone';
 
 // CDNs
-import { bunshinClone } from 'https://esm.sh/bunshin-clone@1.2.7';
+import { bunshinClone } from 'https://esm.sh/bunshin-clone@1.2.8';
 // or
-import { bunshinClone } from 'https://cdn.jsdelivr.net/npm/bunshin-clone@1.2.7/+esm';
+import { bunshinClone } from 'https://cdn.jsdelivr.net/npm/bunshin-clone@1.2.8/+esm';
 // or
-import { bunshinClone } from 'https://esm.unpkg.com/bunshin-clone@1.2.7';
+import { bunshinClone } from 'https://esm.unpkg.com/bunshin-clone@1.2.8';
 ```
 
 ## 📦 APIs
@@ -104,7 +104,7 @@ result.self === result; // true
 const source = {
   get x() {
     return 42;
-  }
+  },
 };
 
 const result = bunshinClone(source);

@@ -1,6 +1,6 @@
 {
   "name": "bunshin-clone",
-  "version": "1.2.7",
+  "version": "1.2.8",
   "description": "High-performance deep clone utility with descriptor support",
   "keywords": [
     "array",
@@ -66,7 +66,7 @@
   "devDependencies": {
     "bun-types": "latest",
     "tsup": "^8.0.0",
-    "typescript": "^5.6.0"
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=18"

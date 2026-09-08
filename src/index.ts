@@ -3,7 +3,7 @@
  * High-performance deep clone utility with descriptor support.
  * Handles circular ref and complex built-in types.
  *
- * @version 1.2.7
+ * @version 1.2.8
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) Yusuke Kamiyamane
@@ -162,15 +162,12 @@ function clone(
   }
 
   // Error and DOMException
-  if (
-    node instanceof Error ||
-    (typeof DOMException !== 'undefined' && node instanceof DOMException)
-  ) {
+  if (node instanceof Error || node instanceof DOMException) {
     return cloneError(node, options, refs);
   }
 
   // Blob
-  if (typeof Blob !== 'undefined' && node instanceof Blob) {
+  if (node instanceof Blob) {
     const result = node.slice(0, node.size, node.type);
     refs.set(node, result); // [Refs.set]
     return result;
@@ -182,23 +179,21 @@ function clone(
       new Uint8ClampedArray(node.data),
       node.width,
       node.height,
+      { colorSpace: node.colorSpace },
     );
     refs.set(node, result); // [Refs.set]
     return result;
   }
 
   // URL
-  if (typeof URL !== 'undefined' && node instanceof URL) {
+  if (node instanceof URL) {
     const result = new URL(node.href);
     refs.set(node, result); // [Refs.set]
     return result;
   }
 
   // URLSearchParams
-  if (
-    typeof URLSearchParams !== 'undefined' &&
-    node instanceof URLSearchParams
-  ) {
+  if (node instanceof URLSearchParams) {
     const result = new URLSearchParams();
     refs.set(node, result); // [Refs.set]
 
@@ -315,10 +310,8 @@ function forEachOwnKey(object: object, fn: (key: string | symbol) => void) {
     fn(key);
   }
 
-  const symbols = Object.getOwnPropertySymbols(object);
-
-  for (let i = 0, l = symbols.length; i < l; i++) {
-    fn(symbols[i] as symbol);
+  for (const symbol of Object.getOwnPropertySymbols(object)) {
+    fn(symbol);
   }
 }
 
