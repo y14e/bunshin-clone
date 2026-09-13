@@ -3,7 +3,7 @@
  * High-performance deep clone utility with descriptor support.
  * Handles circular ref and complex built-in types.
  *
- * @version 1.2.8
+ * @version 1.2.9
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) Yusuke Kamiyamane
@@ -84,12 +84,12 @@ function clone(
     const result = Object.create(Object.getPrototypeOf(node));
     refs.set(node, result); // [Refs.set]
 
-    for (const key in node) {
-      if (!HAS_OWN.call(node, key) || isUnsafeKey(key)) {
+    for (const k in node) {
+      if (!HAS_OWN.call(node, k) || isUnsafeKey(k)) {
         continue;
       }
 
-      result[key] = clone((node as Object)[key], options, refs);
+      result[k] = clone((node as Object)[k], options, refs);
     }
 
     return result;
@@ -100,8 +100,8 @@ function clone(
     const result = new Map();
     refs.set(node, result); // [Refs.set]
 
-    for (const [key, value] of node) {
-      result.set(clone(key, options, refs), clone(value, options, refs));
+    for (const [k, v] of node) {
+      result.set(clone(k, options, refs), clone(v, options, refs));
     }
 
     return result;
@@ -112,8 +112,8 @@ function clone(
     const result = new Set();
     refs.set(node, result); // [Refs.set]
 
-    for (const item of node) {
-      result.add(clone(item, options, refs));
+    for (const i of node) {
+      result.add(clone(i, options, refs));
     }
 
     return result;
@@ -175,12 +175,10 @@ function clone(
 
   // ImageData
   if (typeof ImageData !== 'undefined' && node instanceof ImageData) {
-    const result = new ImageData(
-      new Uint8ClampedArray(node.data),
-      node.width,
-      node.height,
-      { colorSpace: node.colorSpace },
-    );
+    const { data, width, height, colorSpace } = node;
+    const result = new ImageData(new Uint8ClampedArray(data), width, height, {
+      colorSpace: colorSpace,
+    });
     refs.set(node, result); // [Refs.set]
     return result;
   }
@@ -197,8 +195,8 @@ function clone(
     const result = new URLSearchParams();
     refs.set(node, result); // [Refs.set]
 
-    for (const [key, value] of node) {
-      result.append(key, value);
+    for (const [k, v] of node) {
+      result.append(k, v);
     }
 
     return result;
@@ -214,16 +212,16 @@ function cloneError(
   options: Partial<BunshinCloneOptions>,
   refs: Refs,
 ): Error | DOMException {
+  const { name, message, cause, stack } = value;
+
   // DOMException
   if (value instanceof DOMException) {
-    const result = new DOMException(value.message, value.name);
+    const result = new DOMException(message, name);
     refs.set(value, result); // [Refs.set]
     return result;
   }
 
   // Error
-  const name = value.name || 'Error';
-  const message = value.message || '';
   let result: Error;
 
   switch (name) {
@@ -252,18 +250,18 @@ function cloneError(
 
   refs.set(value, result); // [Refs.set]
 
-  if (value.stack) {
+  if (stack) {
     try {
-      result.stack = value.stack;
+      result.stack = stack;
     } catch {}
   }
 
-  if ('cause' in value && value.cause !== undefined) {
-    result.cause = clone(value.cause, options, refs);
+  if ('cause' in value && cause !== undefined) {
+    result.cause = clone(cause, options, refs);
   }
 
-  for (const key of Object.keys(value) as (keyof Error)[]) {
-    result[key] = clone(value[key], options, refs);
+  for (const k of Object.keys(value) as (keyof Error)[]) {
+    result[k] = clone(value[k], options, refs);
   }
 
   return result;
@@ -278,19 +276,19 @@ function cloneWithDescriptors(
   refs.set(node, result); // [Refs.set]
   const descs = Object.getOwnPropertyDescriptors(node);
 
-  forEachOwnKey(descs, (key) => {
-    if (isUnsafeKey(key)) {
+  forEachOwnKey(descs, (k) => {
+    if (isUnsafeKey(k)) {
       return;
     }
 
-    const desc = { ...descs[key] };
+    const desc = { ...descs[k] };
 
     if ('value' in desc) {
       desc.value = clone(desc.value, options, refs);
     }
 
     try {
-      Object.defineProperty(result, key, desc);
+      Object.defineProperty(result, k, desc);
     } catch (error) {
       if (options.strictDescriptors) {
         throw error;
@@ -306,12 +304,12 @@ function cloneWithDescriptors(
 // -----------------------------------------------------------------------------
 
 function forEachOwnKey(object: object, fn: (key: string | symbol) => void) {
-  for (const key of Object.keys(object)) {
-    fn(key);
+  for (const k of Object.keys(object)) {
+    fn(k);
   }
 
-  for (const symbol of Object.getOwnPropertySymbols(object)) {
-    fn(symbol);
+  for (const s of Object.getOwnPropertySymbols(object)) {
+    fn(s);
   }
 }
 
