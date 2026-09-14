@@ -3,7 +3,7 @@
  * High-performance deep clone utility with descriptor support.
  * Handles circular ref and complex built-in types.
  *
- * @version 1.2.10
+ * @version 1.2.11
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) Yusuke Kamiyamane
@@ -46,25 +46,25 @@ export function bunshinClone<T>(
 // Core
 // -----------------------------------------------------------------------------
 
-function clone(
-  node: unknown,
+function clone<T>(
+  node: T,
   options: Partial<BunshinCloneOptions>,
   refs: Refs,
-) {
+): T {
   if (!isObject(node)) {
     return node;
   }
 
   // [Refs]
-  const ref = refs.get(node);
+  const ref = refs.get(node as object);
 
   if (ref !== undefined) {
-    return ref;
+    return ref as T;
   }
 
   // With descriptors
   if (options.preserveDescriptors && isPlainObject(node)) {
-    return cloneWithDescriptors(node as Object, options, refs);
+    return cloneWithDescriptors(node as Object, options, refs) as T;
   }
 
   // Array
@@ -76,13 +76,13 @@ function clone(
       result[i] = clone(node[i], options, refs);
     }
 
-    return result;
+    return result as T;
   }
 
   // Plain object
   if (isPlainObject(node)) {
     const result = Object.create(Object.getPrototypeOf(node));
-    refs.set(node, result); // [Refs.set]
+    refs.set(node as object, result); // [Refs.set]
 
     for (const key in node) {
       if (!HAS_OWN.call(node, key) || isUnsafeKey(key)) {
@@ -92,7 +92,7 @@ function clone(
       result[key] = clone((node as Object)[key], options, refs);
     }
 
-    return result;
+    return result as T;
   }
 
   // Map
@@ -104,7 +104,7 @@ function clone(
       result.set(clone(key, options, refs), clone(value, options, refs));
     }
 
-    return result;
+    return result as T;
   }
 
   // Set
@@ -116,14 +116,14 @@ function clone(
       result.add(clone(item, options, refs));
     }
 
-    return result;
+    return result as T;
   }
 
   // Date
   if (node instanceof Date) {
     const result = new Date(node.getTime());
     refs.set(node, result); // [Refs.set]
-    return result;
+    return result as T;
   }
 
   // RegExp
@@ -131,14 +131,14 @@ function clone(
     const result = new RegExp(node.source, node.flags);
     refs.set(node, result); // [Refs.set]
     result.lastIndex = node.lastIndex;
-    return result;
+    return result as T;
   }
 
   // ArrayBuffer
   if (node instanceof ArrayBuffer) {
     const result = node.slice(0);
     refs.set(node, result); // [Refs.set]
-    return result;
+    return result as T;
   }
 
   // DataView and TypedArray
@@ -149,7 +149,7 @@ function clone(
     if (node instanceof DataView) {
       const result = new DataView(buffer.slice(0), byteOffset, byteLength);
       refs.set(node, result); // [Refs.set]
-      return result;
+      return result as T;
     }
 
     // TypedArray
@@ -158,19 +158,19 @@ function clone(
     ) => ArrayBufferView;
     const result = new Ctor(buffer.slice(byteOffset, byteOffset + byteLength));
     refs.set(node, result); // [Refs.set]
-    return result;
+    return result as T;
   }
 
   // Error and DOMException
   if (node instanceof Error || node instanceof DOMException) {
-    return cloneError(node, options, refs);
+    return cloneError(node, options, refs) as T;
   }
 
   // Blob
   if (node instanceof Blob) {
     const result = node.slice(0, node.size, node.type);
     refs.set(node, result); // [Refs.set]
-    return result;
+    return result as T;
   }
 
   // ImageData
@@ -180,14 +180,14 @@ function clone(
       colorSpace: colorSpace,
     });
     refs.set(node, result); // [Refs.set]
-    return result;
+    return result as T;
   }
 
   // URL
   if (node instanceof URL) {
     const result = new URL(node.href);
     refs.set(node, result); // [Refs.set]
-    return result;
+    return result as T;
   }
 
   // URLSearchParams
@@ -199,26 +199,26 @@ function clone(
       result.append(key, value);
     }
 
-    return result;
+    return result as T;
   }
 
   // Fallback: unsupported types
-  refs.set(node, node); // [Refs.set]
+  refs.set(node as object, node); // [Refs.set]
   return node;
 }
 
-function cloneError(
-  value: Error | DOMException,
+function cloneError<T extends Error | DOMException>(
+  value: T,
   options: Partial<BunshinCloneOptions>,
   refs: Refs,
-): Error | DOMException {
+): T {
   const { name, message, cause, stack } = value;
 
   // DOMException
   if (value instanceof DOMException) {
     const result = new DOMException(message, name);
     refs.set(value, result); // [Refs.set]
-    return result;
+    return result as T;
   }
 
   // Error
@@ -261,17 +261,17 @@ function cloneError(
   }
 
   for (const key of Object.keys(value) as (keyof Error)[]) {
-    result[key] = clone(value[key], options, refs);
+    (result as unknown as Object)[key] = clone(value[key], options, refs);
   }
 
-  return result;
+  return result as T;
 }
 
-function cloneWithDescriptors(
-  node: Object,
+function cloneWithDescriptors<T extends Object>(
+  node: T,
   options: Partial<BunshinCloneOptions>,
   refs: Refs,
-) {
+): T {
   const result = Object.create(Object.getPrototypeOf(node));
   refs.set(node, result); // [Refs.set]
   const descs = Object.getOwnPropertyDescriptors(node);
@@ -303,7 +303,10 @@ function cloneWithDescriptors(
 // Utils
 // -----------------------------------------------------------------------------
 
-function forEachOwnKey(object: object, fn: (key: string | symbol) => void) {
+function forEachOwnKey(
+  object: object,
+  fn: (key: string | symbol) => void,
+): void {
   for (const key of Object.keys(object)) {
     fn(key);
   }
@@ -313,11 +316,11 @@ function forEachOwnKey(object: object, fn: (key: string | symbol) => void) {
   }
 }
 
-function isObject(value: unknown) {
+function isObject(value: unknown): boolean {
   return typeof value === 'object' && value !== null;
 }
 
-function isPlainObject(value: unknown) {
+function isPlainObject(value: unknown): boolean {
   if (value === null || typeof value !== 'object') {
     return false;
   }
@@ -326,7 +329,7 @@ function isPlainObject(value: unknown) {
   return proto === Object.prototype || proto === null;
 }
 
-function isUnsafeKey(key: PropertyKey) {
+function isUnsafeKey(key: PropertyKey): boolean {
   return (
     typeof key === 'string' &&
     (key === '__proto__' || key === 'prototype' || key === 'constructor')
