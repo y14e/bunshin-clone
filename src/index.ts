@@ -3,7 +3,7 @@
  * High-performance deep clone utility with descriptor support.
  * Handles circular ref and complex built-in types.
  *
- * @version 1.2.11
+ * @version 1.2.12
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) Yusuke Kamiyamane
@@ -303,24 +303,24 @@ function cloneWithDescriptors<T extends Object>(
 // Utils
 // -----------------------------------------------------------------------------
 
-function forEachOwnKey(
+export function forEachOwnKey(
   object: object,
-  fn: (key: string | symbol) => void,
+  callback: (key: string | symbol) => void,
 ): void {
   for (const key of Object.keys(object)) {
-    fn(key);
+    callback(key);
   }
 
   for (const symbol of Object.getOwnPropertySymbols(object)) {
-    fn(symbol);
+    callback(symbol);
   }
 }
 
-function isObject(value: unknown): boolean {
+export function isObject(value: unknown): boolean {
   return typeof value === 'object' && value !== null;
 }
 
-function isPlainObject(value: unknown): boolean {
+export function isPlainObject(value: unknown): boolean {
   if (value === null || typeof value !== 'object') {
     return false;
   }
@@ -329,7 +329,7 @@ function isPlainObject(value: unknown): boolean {
   return proto === Object.prototype || proto === null;
 }
 
-function isUnsafeKey(key: PropertyKey): boolean {
+export function isUnsafeKey(key: PropertyKey): boolean {
   return (
     typeof key === 'string' &&
     (key === '__proto__' || key === 'prototype' || key === 'constructor')
