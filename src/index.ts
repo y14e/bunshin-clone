@@ -179,7 +179,7 @@ function clone<T>(
   if (typeof ImageData !== 'undefined' && node instanceof ImageData) {
     const { data, width, height, colorSpace } = node;
     const result = new ImageData(new Uint8ClampedArray(data), width, height, {
-      colorSpace: colorSpace,
+      colorSpace,
     });
     refs.set(node, result); // [Refs.set]
     return result as T;
