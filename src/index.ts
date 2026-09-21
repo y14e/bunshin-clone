@@ -3,7 +3,7 @@
  * High-performance deep clone utility with descriptor support.
  * Handles circular ref and complex built-in types.
  *
- * @version 1.2.14
+ * @version 1.2.15
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) Yusuke Kamiyamane
@@ -209,7 +209,7 @@ function clone<T>(
   return node;
 }
 
-function cloneError<T extends Error | DOMException>(
+function cloneError<T extends DOMException | Error>(
   value: T,
   settings: Partial<BunshinCloneOptions>,
   refs: Refs,
