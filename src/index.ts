@@ -3,7 +3,7 @@
  * High-performance deep clone utility with descriptor support.
  * Handles circular ref and complex built-in types.
  *
- * @version 1.2.12
+ * @version 1.2.13
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) Yusuke Kamiyamane
@@ -56,7 +56,7 @@ function clone<T>(
   }
 
   // [Refs]
-  const ref = refs.get(node as object);
+  const ref = refs.get(node);
 
   if (ref !== undefined) {
     return ref as T;
@@ -64,7 +64,7 @@ function clone<T>(
 
   // With descriptors
   if (options.preserveDescriptors && isPlainObject(node)) {
-    return cloneWithDescriptors(node as Object, options, refs) as T;
+    return cloneWithDescriptors(node, options, refs) as T;
   }
 
   // Array
@@ -82,14 +82,14 @@ function clone<T>(
   // Plain object
   if (isPlainObject(node)) {
     const result = Object.create(Object.getPrototypeOf(node));
-    refs.set(node as object, result); // [Refs.set]
+    refs.set(node, result); // [Refs.set]
 
     for (const key in node) {
       if (!HAS_OWN.call(node, key) || isUnsafeKey(key)) {
         continue;
       }
 
-      result[key] = clone((node as Object)[key], options, refs);
+      result[key] = clone(node[key], options, refs);
     }
 
     return result as T;
@@ -161,8 +161,8 @@ function clone<T>(
     return result as T;
   }
 
-  // Error and DOMException
-  if (node instanceof Error || node instanceof DOMException) {
+  // DOMException and Error
+  if (node instanceof DOMException || node instanceof Error) {
     return cloneError(node, options, refs) as T;
   }
 
@@ -203,7 +203,7 @@ function clone<T>(
   }
 
   // Fallback: unsupported types
-  refs.set(node as object, node); // [Refs.set]
+  refs.set(node, node); // [Refs.set]
   return node;
 }
 
@@ -260,8 +260,8 @@ function cloneError<T extends Error | DOMException>(
     result.cause = clone(cause, options, refs);
   }
 
-  for (const key of Object.keys(value) as (keyof Error)[]) {
-    (result as unknown as Object)[key] = clone(value[key], options, refs);
+  for (const key of Object.keys(value)) {
+    Reflect.set(result, key, clone(Reflect.get(value, key), options, refs));
   }
 
   return result as T;
@@ -304,7 +304,7 @@ function cloneWithDescriptors<T extends Object>(
 // -----------------------------------------------------------------------------
 
 export function forEachOwnKey(
-  object: object,
+  object: Object,
   callback: (key: string | symbol) => void,
 ): void {
   for (const key of Object.keys(object)) {
@@ -316,12 +316,12 @@ export function forEachOwnKey(
   }
 }
 
-export function isObject(value: unknown): boolean {
+export function isObject(value: unknown): value is Object {
   return typeof value === 'object' && value !== null;
 }
 
 export function isPlainObject(value: unknown): boolean {
-  if (value === null || typeof value !== 'object') {
+  if (typeof value !== 'object' || value === null) {
     return false;
   }
 
