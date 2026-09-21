@@ -3,7 +3,7 @@
  * High-performance deep clone utility with descriptor support.
  * Handles circular ref and complex built-in types.
  *
- * @version 1.2.15
+ * @version 1.3.0
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) Yusuke Kamiyamane
@@ -19,7 +19,7 @@ export interface BunshinCloneOptions {
   strictDescriptors: boolean;
 }
 
-type Object = Record<PropertyKey, unknown>;
+type PlainObject = Record<PropertyKey, unknown>;
 
 type Refs = WeakMap<object, unknown>;
 
@@ -269,7 +269,7 @@ function cloneError<T extends DOMException | Error>(
   return result as T;
 }
 
-function cloneWithDescriptors<T extends Object>(
+function cloneWithDescriptors<T extends PlainObject>(
   node: T,
   settings: Partial<BunshinCloneOptions>,
   refs: Refs,
@@ -306,7 +306,7 @@ function cloneWithDescriptors<T extends Object>(
 // -----------------------------------------------------------------------------
 
 export function forEachOwnKey(
-  object: Object,
+  object: PlainObject,
   callback: (key: string | symbol) => void,
 ): void {
   for (const key of Object.keys(object)) {
@@ -318,11 +318,11 @@ export function forEachOwnKey(
   }
 }
 
-export function isObject(value: unknown): value is Object {
+export function isObject(value: unknown): value is object {
   return typeof value === 'object' && value !== null;
 }
 
-export function isPlainObject(value: unknown): boolean {
+export function isPlainObject(value: unknown): value is PlainObject {
   if (typeof value !== 'object' || value === null) {
     return false;
   }
