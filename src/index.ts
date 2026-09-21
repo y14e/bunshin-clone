@@ -3,7 +3,7 @@
  * High-performance deep clone utility with descriptor support.
  * Handles circular ref and complex built-in types.
  *
- * @version 1.2.13
+ * @version 1.2.14
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) Yusuke Kamiyamane
@@ -62,9 +62,11 @@ function clone<T>(
     return ref as T;
   }
 
+  const settings = resolveOptions(options);
+
   // With descriptors
-  if (options.preserveDescriptors && isPlainObject(node)) {
-    return cloneWithDescriptors(node, options, refs) as T;
+  if (settings.preserveDescriptors && isPlainObject(node)) {
+    return cloneWithDescriptors(node, settings, refs) as T;
   }
 
   // Array
@@ -73,7 +75,7 @@ function clone<T>(
     refs.set(node, result); // [Refs.set]
 
     for (let i = 0, l = node.length; i < l; i++) {
-      result[i] = clone(node[i], options, refs);
+      result[i] = clone(node[i], settings, refs);
     }
 
     return result as T;
@@ -89,7 +91,7 @@ function clone<T>(
         continue;
       }
 
-      result[key] = clone(node[key], options, refs);
+      result[key] = clone(node[key], settings, refs);
     }
 
     return result as T;
@@ -101,7 +103,7 @@ function clone<T>(
     refs.set(node, result); // [Refs.set]
 
     for (const [key, value] of node) {
-      result.set(clone(key, options, refs), clone(value, options, refs));
+      result.set(clone(key, settings, refs), clone(value, settings, refs));
     }
 
     return result as T;
@@ -113,7 +115,7 @@ function clone<T>(
     refs.set(node, result); // [Refs.set]
 
     for (const item of node) {
-      result.add(clone(item, options, refs));
+      result.add(clone(item, settings, refs));
     }
 
     return result as T;
@@ -163,7 +165,7 @@ function clone<T>(
 
   // DOMException and Error
   if (node instanceof DOMException || node instanceof Error) {
-    return cloneError(node, options, refs) as T;
+    return cloneError(node, settings, refs) as T;
   }
 
   // Blob
@@ -209,7 +211,7 @@ function clone<T>(
 
 function cloneError<T extends Error | DOMException>(
   value: T,
-  options: Partial<BunshinCloneOptions>,
+  settings: Partial<BunshinCloneOptions>,
   refs: Refs,
 ): T {
   const { name, message, cause, stack } = value;
@@ -257,11 +259,11 @@ function cloneError<T extends Error | DOMException>(
   }
 
   if ('cause' in value && cause !== undefined) {
-    result.cause = clone(cause, options, refs);
+    result.cause = clone(cause, settings, refs);
   }
 
   for (const key of Object.keys(value)) {
-    Reflect.set(result, key, clone(Reflect.get(value, key), options, refs));
+    Reflect.set(result, key, clone(Reflect.get(value, key), settings, refs));
   }
 
   return result as T;
@@ -269,7 +271,7 @@ function cloneError<T extends Error | DOMException>(
 
 function cloneWithDescriptors<T extends Object>(
   node: T,
-  options: Partial<BunshinCloneOptions>,
+  settings: Partial<BunshinCloneOptions>,
   refs: Refs,
 ): T {
   const result = Object.create(Object.getPrototypeOf(node));
@@ -284,13 +286,13 @@ function cloneWithDescriptors<T extends Object>(
     const desc = { ...descs[key] };
 
     if ('value' in desc) {
-      desc.value = clone(desc.value, options, refs);
+      desc.value = clone(desc.value, settings, refs);
     }
 
     try {
       Object.defineProperty(result, key, desc);
     } catch (error) {
-      if (options.strictDescriptors) {
+      if (settings.strictDescriptors) {
         throw error;
       }
     }
@@ -334,4 +336,22 @@ export function isUnsafeKey(key: PropertyKey): boolean {
     typeof key === 'string' &&
     (key === '__proto__' || key === 'prototype' || key === 'constructor')
   );
+}
+
+function resolveOptions(
+  options: Partial<BunshinCloneOptions>,
+): BunshinCloneOptions {
+  let { preserveDescriptors = false, strictDescriptors = false } = options;
+
+  if (typeof preserveDescriptors !== 'boolean') {
+    console.warn('Invalid preserveDescriptors option. Fallback: false.');
+    preserveDescriptors = false;
+  }
+
+  if (typeof strictDescriptors !== 'boolean') {
+    console.warn('Invalid strictDescriptors option. Fallback: false.');
+    strictDescriptors = false;
+  }
+
+  return { preserveDescriptors, strictDescriptors };
 }

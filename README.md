@@ -13,11 +13,11 @@ npm i bunshin-clone
 import { bunshinClone } from 'bunshin-clone';
 
 // CDNs
-import { bunshinClone } from 'https://esm.sh/bunshin-clone@1.2.13';
+import { bunshinClone } from 'https://esm.sh/bunshin-clone@1.2.14';
 // or
-import { bunshinClone } from 'https://cdn.jsdelivr.net/npm/bunshin-clone@1.2.13/+esm';
+import { bunshinClone } from 'https://cdn.jsdelivr.net/npm/bunshin-clone@1.2.14/+esm';
 // or
-import { bunshinClone } from 'https://esm.unpkg.com/bunshin-clone@1.2.13';
+import { bunshinClone } from 'https://esm.unpkg.com/bunshin-clone@1.2.14';
 ```
 
 ## 📦 APIs
@@ -79,7 +79,7 @@ bunshin-clone correctly handles:
 - ArrayBuffer
 - DataView
 - TypedArray (Uint8Array, etc.)
-- Error / DOMException
+- DOMException / Error
 - Blob
 - ImageData
 - URL
