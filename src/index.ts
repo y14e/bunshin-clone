@@ -319,6 +319,7 @@ export function forEachOwnKey(
 }
 
 export function isObject(value: unknown): value is object {
+  // 'typeof null' is 'object', but 'object' type excludes 'null'.
   return typeof value === 'object' && value !== null;
 }
 
