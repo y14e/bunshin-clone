@@ -120,6 +120,56 @@ describe('bunshinClone', () => {
     expect(result.name).toBe('TypeError');
   });
 
+  test('AggregateError', () => {
+    const err1 = new Error('error 1');
+    const err2 = new TypeError('error 2');
+    const source = new AggregateError(
+      [err1, err2],
+      'Multiple errors occurred',
+      {
+        cause: new Error('root cause'),
+      },
+    );
+    (source as any).customProp = { detail: 'extra info' };
+
+    const result = bunshinClone(source) as AggregateError & {
+      customProp: { detail: string };
+    };
+
+    expect(result).not.toBe(source);
+    expect(result).toBeInstanceOf(AggregateError);
+    expect(result.message).toBe('Multiple errors occurred');
+    expect(result.name).toBe('AggregateError');
+
+    // errors 配列とその内部のエラーオブジェクトがクローンされているか
+    expect(result.errors).toHaveLength(2);
+    expect(result.errors[0]).not.toBe(err1);
+    expect(result.errors[0].message).toBe('error 1');
+    expect(result.errors[1]).not.toBe(err2);
+    expect(result.errors[1].message).toBe('error 2');
+    expect(result.errors[1].name).toBe('TypeError');
+
+    // cause がディープクローンされているか
+    expect(result.cause).not.toBe((source as any).cause);
+    expect((result.cause as Error).message).toBe('root cause');
+
+    // カスタムプロパティがディープクローンされているか
+    expect(result.customProp).toEqual({ detail: 'extra info' });
+    expect(result.customProp).not.toBe((source as any).customProp);
+  });
+
+  test('AggregateError with circular reference', () => {
+    const err = new Error('inner error');
+    const source = new AggregateError([err], 'Circular AggregateError');
+    (source as any).self = source;
+
+    const result = bunshinClone(source) as any;
+
+    expect(result).not.toBe(source);
+    expect(result.self).toBe(result);
+    expect(result.errors[0]).not.toBe(err);
+  });
+
   test('URL', () => {
     const source = new URL('https://example.com');
     const result = bunshinClone(source) as URL;

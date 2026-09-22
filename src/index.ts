@@ -1,19 +1,3 @@
-/**
- * Bunshin Clone
- * High-performance deep clone utility with descriptor support.
- * Handles circular ref and complex built-in types.
- *
- * @version 1.3.2
- * @author Yusuke Kamiyamane
- * @license MIT
- * @copyright Copyright (c) Yusuke Kamiyamane
- * @see {@link https://github.com/y14e/bunshin-clone}
- */
-
-// -----------------------------------------------------------------------------
-// Types
-// -----------------------------------------------------------------------------
-
 export interface BunshinCloneOptions {
   preserveDescriptors: boolean;
   strictDescriptors: boolean;
@@ -23,16 +7,8 @@ type PlainObject = Record<PropertyKey, unknown>;
 
 type Refs = WeakMap<object, unknown>;
 
-// -----------------------------------------------------------------------------
-// Constants
-// -----------------------------------------------------------------------------
-
 const EMPTY_OPTIONS = {};
 const { hasOwnProperty: HAS_OWN } = Object.prototype;
-
-// -----------------------------------------------------------------------------
-// APIs
-// -----------------------------------------------------------------------------
 
 export function bunshinClone<T>(
   source: T,
@@ -41,10 +17,6 @@ export function bunshinClone<T>(
 ): T {
   return clone(source, options, refs);
 }
-
-// -----------------------------------------------------------------------------
-// Core
-// -----------------------------------------------------------------------------
 
 function clone<T>(
   node: T,
@@ -214,52 +186,23 @@ function cloneError<T extends DOMException | Error>(
   settings: Partial<BunshinCloneOptions>,
   refs: Refs,
 ): T {
-  const { message, name, stack, cause } = value;
+  const result = createErrorInstance(value, settings, refs);
+  refs.set(value, result); // [Refs]
 
   // DOMException
   if (value instanceof DOMException) {
-    const result = new DOMException(message, name);
-    refs.set(value, result); // [Refs]
     return result as T;
   }
 
   // Error
-  let result: Error;
-
-  switch (name) {
-    case 'EvalError':
-      result = new EvalError(message);
-      break;
-    case 'RangeError':
-      result = new RangeError(message);
-      break;
-    case 'ReferenceError':
-      result = new ReferenceError(message);
-      break;
-    case 'SyntaxError':
-      result = new SyntaxError(message);
-      break;
-    case 'TypeError':
-      result = new TypeError(message);
-      break;
-    case 'URIError':
-      result = new URIError(message);
-      break;
-    default:
-      result = new Error(message);
-      result.name = name;
-  }
-
-  refs.set(value, result); // [Refs]
-
-  if (stack) {
+  if (value.stack) {
     try {
-      result.stack = stack;
+      result.stack = value.stack;
     } catch {}
   }
 
-  if ('cause' in value && cause !== undefined) {
-    result.cause = clone(cause, settings, refs);
+  if ('cause' in value && value.cause !== undefined) {
+    (result as Error).cause = clone(value.cause, settings, refs);
   }
 
   for (const key of Object.keys(value)) {
@@ -301,9 +244,47 @@ function cloneWithDescriptors<T extends PlainObject>(
   return result;
 }
 
-// -----------------------------------------------------------------------------
-// Utils
-// -----------------------------------------------------------------------------
+const ERROR_CTORS: Record<string, new (message?: string) => Error> = {
+  EvalError,
+  RangeError,
+  ReferenceError,
+  SyntaxError,
+  TypeError,
+  URIError,
+};
+
+function createErrorInstance(
+  value: DOMException | Error,
+  settings: Partial<BunshinCloneOptions>,
+  refs: Refs,
+): DOMException | Error {
+  const { message, name } = value;
+
+  // DOMException
+  if (value instanceof DOMException) {
+    return new DOMException(message, name);
+  }
+
+  // AggregateError
+  if (value instanceof AggregateError) {
+    return new AggregateError(
+      value.errors.map((e) => clone(e, settings, refs)),
+      message,
+    );
+  }
+
+  // Standard built-in errors
+  const Ctor = ERROR_CTORS[name];
+
+  if (Ctor) {
+    return new Ctor(message);
+  }
+
+  // Fallback: unknown error types
+  const result = new Error(message);
+  result.name = name;
+  return result;
+}
 
 export function forEachOwnKey(
   object: PlainObject,
