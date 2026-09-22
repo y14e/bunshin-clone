@@ -3,7 +3,7 @@
  * High-performance deep clone utility with descriptor support.
  * Handles circular ref and complex built-in types.
  *
- * @version 1.3.0
+ * @version 1.3.1
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) Yusuke Kamiyamane
@@ -72,7 +72,7 @@ function clone<T>(
   // Array
   if (Array.isArray(node)) {
     const result: unknown[] = [];
-    refs.set(node, result); // [Refs.set]
+    refs.set(node, result); // [Refs]
 
     for (let i = 0, l = node.length; i < l; i++) {
       result[i] = clone(node[i], settings, refs);
@@ -84,7 +84,7 @@ function clone<T>(
   // Plain object
   if (isPlainObject(node)) {
     const result = Object.create(Object.getPrototypeOf(node));
-    refs.set(node, result); // [Refs.set]
+    refs.set(node, result); // [Refs]
 
     for (const key in node) {
       if (!HAS_OWN.call(node, key) || isUnsafeKey(key)) {
@@ -100,7 +100,7 @@ function clone<T>(
   // Map
   if (node instanceof Map) {
     const result = new Map();
-    refs.set(node, result); // [Refs.set]
+    refs.set(node, result); // [Refs]
 
     for (const [key, value] of node) {
       result.set(clone(key, settings, refs), clone(value, settings, refs));
@@ -112,7 +112,7 @@ function clone<T>(
   // Set
   if (node instanceof Set) {
     const result = new Set();
-    refs.set(node, result); // [Refs.set]
+    refs.set(node, result); // [Refs]
 
     for (const item of node) {
       result.add(clone(item, settings, refs));
@@ -124,14 +124,14 @@ function clone<T>(
   // Date
   if (node instanceof Date) {
     const result = new Date(node.getTime());
-    refs.set(node, result); // [Refs.set]
+    refs.set(node, result); // [Refs]
     return result as T;
   }
 
   // RegExp
   if (node instanceof RegExp) {
     const result = new RegExp(node.source, node.flags);
-    refs.set(node, result); // [Refs.set]
+    refs.set(node, result); // [Refs]
     result.lastIndex = node.lastIndex;
     return result as T;
   }
@@ -139,7 +139,7 @@ function clone<T>(
   // ArrayBuffer
   if (node instanceof ArrayBuffer) {
     const result = node.slice(0);
-    refs.set(node, result); // [Refs.set]
+    refs.set(node, result); // [Refs]
     return result as T;
   }
 
@@ -150,7 +150,7 @@ function clone<T>(
     // DataView
     if (node instanceof DataView) {
       const result = new DataView(buffer.slice(0), byteOffset, byteLength);
-      refs.set(node, result); // [Refs.set]
+      refs.set(node, result); // [Refs]
       return result as T;
     }
 
@@ -159,7 +159,7 @@ function clone<T>(
       buffer: ArrayBufferLike,
     ) => ArrayBufferView;
     const result = new Ctor(buffer.slice(byteOffset, byteOffset + byteLength));
-    refs.set(node, result); // [Refs.set]
+    refs.set(node, result); // [Refs]
     return result as T;
   }
 
@@ -171,7 +171,7 @@ function clone<T>(
   // Blob
   if (node instanceof Blob) {
     const result = node.slice(0, node.size, node.type);
-    refs.set(node, result); // [Refs.set]
+    refs.set(node, result); // [Refs]
     return result as T;
   }
 
@@ -181,21 +181,21 @@ function clone<T>(
     const result = new ImageData(new Uint8ClampedArray(data), width, height, {
       colorSpace,
     });
-    refs.set(node, result); // [Refs.set]
+    refs.set(node, result); // [Refs]
     return result as T;
   }
 
   // URL
   if (node instanceof URL) {
     const result = new URL(node.href);
-    refs.set(node, result); // [Refs.set]
+    refs.set(node, result); // [Refs]
     return result as T;
   }
 
   // URLSearchParams
   if (node instanceof URLSearchParams) {
     const result = new URLSearchParams();
-    refs.set(node, result); // [Refs.set]
+    refs.set(node, result); // [Refs]
 
     for (const [key, value] of node) {
       result.append(key, value);
@@ -205,7 +205,7 @@ function clone<T>(
   }
 
   // Fallback: unsupported types
-  refs.set(node, node); // [Refs.set]
+  refs.set(node, node); // [Refs]
   return node;
 }
 
@@ -214,12 +214,12 @@ function cloneError<T extends DOMException | Error>(
   settings: Partial<BunshinCloneOptions>,
   refs: Refs,
 ): T {
-  const { name, message, cause, stack } = value;
+  const { message, name, stack, cause } = value;
 
   // DOMException
   if (value instanceof DOMException) {
     const result = new DOMException(message, name);
-    refs.set(value, result); // [Refs.set]
+    refs.set(value, result); // [Refs]
     return result as T;
   }
 
@@ -250,7 +250,7 @@ function cloneError<T extends DOMException | Error>(
       result.name = name;
   }
 
-  refs.set(value, result); // [Refs.set]
+  refs.set(value, result); // [Refs]
 
   if (stack) {
     try {
@@ -275,7 +275,7 @@ function cloneWithDescriptors<T extends PlainObject>(
   refs: Refs,
 ): T {
   const result = Object.create(Object.getPrototypeOf(node));
-  refs.set(node, result); // [Refs.set]
+  refs.set(node, result); // [Refs]
   const descs = Object.getOwnPropertyDescriptors(node);
 
   forEachOwnKey(descs, (key) => {
