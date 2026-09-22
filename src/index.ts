@@ -181,17 +181,17 @@ function clone<T>(
   return node;
 }
 
-function cloneError<T extends DOMException | Error>(
-  value: T,
+function cloneError(
+  value: DOMException | Error,
   settings: Partial<BunshinCloneOptions>,
   refs: Refs,
-): T {
+): DOMException | Error {
   const result = createErrorInstance(value, settings, refs);
   refs.set(value, result); // [Refs]
 
   // DOMException
   if (value instanceof DOMException) {
-    return result as T;
+    return result;
   }
 
   // Error
@@ -202,21 +202,21 @@ function cloneError<T extends DOMException | Error>(
   }
 
   if ('cause' in value && value.cause !== undefined) {
-    (result as Error).cause = clone(value.cause, settings, refs);
+    result.cause = clone(value.cause, settings, refs);
   }
 
   for (const key of Object.keys(value)) {
     Reflect.set(result, key, clone(Reflect.get(value, key), settings, refs));
   }
 
-  return result as T;
+  return result;
 }
 
-function cloneWithDescriptors<T extends PlainObject>(
-  node: T,
+function cloneWithDescriptors(
+  node: PlainObject,
   settings: Partial<BunshinCloneOptions>,
   refs: Refs,
-): T {
+): PlainObject {
   const result = Object.create(Object.getPrototypeOf(node));
   refs.set(node, result); // [Refs]
   const descs = Object.getOwnPropertyDescriptors(node);
