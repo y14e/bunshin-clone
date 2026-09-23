@@ -59,11 +59,9 @@ function clone<T>(
     refs.set(source, result); // [Refs]
 
     for (const key in source) {
-      if (!HAS_OWN.call(source, key) || isUnsafeKey(key)) {
-        continue;
+      if (HAS_OWN.call(source, key) && !isUnsafeKey(key)) {
+        result[key] = clone(source[key], settings, refs);
       }
-
-      result[key] = clone(source[key], settings, refs);
     }
 
     return result as T;
@@ -195,14 +193,16 @@ function cloneError(
   }
 
   // Error
-  if (source.stack) {
+  const { stack, cause } = source;
+
+  if (stack) {
     try {
-      result.stack = source.stack;
+      result.stack = stack;
     } catch {}
   }
 
-  if ('cause' in source && source.cause !== undefined) {
-    result.cause = clone(source.cause, settings, refs);
+  if ('cause' in source && cause !== undefined) {
+    result.cause = clone(cause, settings, refs);
   }
 
   for (const key of Object.keys(source)) {
