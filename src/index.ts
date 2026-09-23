@@ -16,6 +16,7 @@ type TypedArray =
   | Uint16Array
   | Int32Array
   | Uint32Array
+  | Float16Array
   | Float32Array
   | Float64Array
   | BigInt64Array
@@ -38,10 +39,10 @@ function clone<T>(source: T, settings: BunshinCloneOptions, refs: Refs): T {
   }
 
   // [Refs]
-  const ref = refs.get(source);
+  const ref = refs.get(source) as T | undefined;
 
   if (ref !== undefined) {
-    return ref as T;
+    return ref;
   }
 
   // With descriptors
@@ -205,10 +206,10 @@ function clone<T>(source: T, settings: BunshinCloneOptions, refs: Refs): T {
 }
 
 function cloneBuffer(buffer: ArrayBufferLike, refs: Refs): ArrayBufferLike {
-  const ref = refs.get(buffer);
+  const ref = refs.get(buffer) as ArrayBufferLike | undefined;
 
   if (ref !== undefined) {
-    return ref as ArrayBufferLike;
+    return ref;
   }
 
   const result = buffer.slice(0);
