@@ -1,4 +1,5 @@
 export interface BunshinCloneOptions {
+  preserveBufferSharing: boolean;
   preserveDescriptors: boolean;
   strictDescriptors: boolean;
 }
@@ -6,6 +7,19 @@ export interface BunshinCloneOptions {
 type PlainObject = Record<PropertyKey, unknown>;
 
 type Refs = WeakMap<object, unknown>;
+
+type TypedArray =
+  | Int8Array
+  | Uint8Array
+  | Uint8ClampedArray
+  | Int16Array
+  | Uint16Array
+  | Int32Array
+  | Uint32Array
+  | Float32Array
+  | Float64Array
+  | BigInt64Array
+  | BigUint64Array;
 
 const EMPTY_OPTIONS = {};
 const { hasOwnProperty: HAS_OWN } = Object.prototype;
@@ -15,14 +29,10 @@ export function bunshinClone<T>(
   options: Partial<BunshinCloneOptions> = EMPTY_OPTIONS,
   refs: Refs = new WeakMap(),
 ): T {
-  return clone(source, options, refs);
+  return clone(source, resolveOptions(options), refs);
 }
 
-function clone<T>(
-  source: T,
-  options: Partial<BunshinCloneOptions>,
-  refs: Refs,
-): T {
+function clone<T>(source: T, settings: BunshinCloneOptions, refs: Refs): T {
   if (!isObject(source)) {
     return source;
   }
@@ -33,8 +43,6 @@ function clone<T>(
   if (ref !== undefined) {
     return ref as T;
   }
-
-  const settings = resolveOptions(options);
 
   // With descriptors
   if (settings.preserveDescriptors && isPlainObject(source)) {
@@ -115,20 +123,37 @@ function clone<T>(
 
   // DataView and TypedArray
   if (ArrayBuffer.isView(source)) {
-    const { buffer, byteOffset, byteLength } = source;
-
     // DataView
     if (source instanceof DataView) {
-      const result = new DataView(buffer.slice(0), byteOffset, byteLength);
+      const { buffer, byteOffset, byteLength } = source;
+      const result = new DataView(
+        cloneBuffer(buffer, refs),
+        byteOffset,
+        byteLength,
+      );
       refs.set(source, result); // [Refs]
       return result as T;
     }
 
     // TypedArray
-    const Ctor = source.constructor as new (
+    const view = source as unknown as TypedArray;
+
+    // TypedArray - unpreserve buffer sharing (fast)
+    if (!settings.preserveBufferSharing) {
+      const Ctor = view.constructor as new (source: TypedArray) => TypedArray;
+      const result = new Ctor(view);
+      refs.set(source, result); // [Refs]
+      return result as T;
+    }
+
+    // TypedArray - preserve buffer sharing (slow)
+    const Ctor = view.constructor as new (
       buffer: ArrayBufferLike,
-    ) => ArrayBufferView;
-    const result = new Ctor(buffer.slice(byteOffset, byteOffset + byteLength));
+      byteOffset: number,
+      length: number,
+    ) => TypedArray;
+    const { buffer, byteOffset, length } = view;
+    const result = new Ctor(cloneBuffer(buffer, refs), byteOffset, length);
     refs.set(source, result); // [Refs]
     return result as T;
   }
@@ -179,9 +204,21 @@ function clone<T>(
   return source;
 }
 
+function cloneBuffer(buffer: ArrayBufferLike, refs: Refs): ArrayBufferLike {
+  const ref = refs.get(buffer);
+
+  if (ref !== undefined) {
+    return ref as ArrayBufferLike;
+  }
+
+  const result = buffer.slice(0);
+  refs.set(buffer, result); // [Refs]
+  return result;
+}
+
 function cloneError(
   source: DOMException | Error,
-  settings: Partial<BunshinCloneOptions>,
+  settings: BunshinCloneOptions,
   refs: Refs,
 ): DOMException | Error {
   const result = createErrorInstance(source, settings, refs);
@@ -214,7 +251,7 @@ function cloneError(
 
 function cloneWithDescriptors(
   source: PlainObject,
-  settings: Partial<BunshinCloneOptions>,
+  settings: BunshinCloneOptions,
   refs: Refs,
 ): PlainObject {
   const result = Object.create(Object.getPrototypeOf(source));
@@ -255,7 +292,7 @@ const ERROR_CTORS: Record<string, new (message?: string) => Error> = {
 
 function createErrorInstance(
   source: DOMException | Error,
-  settings: Partial<BunshinCloneOptions>,
+  settings: BunshinCloneOptions,
   refs: Refs,
 ): DOMException | Error {
   const { message, name } = source;
@@ -323,7 +360,16 @@ export function isUnsafeKey(key: PropertyKey): boolean {
 function resolveOptions(
   options: Partial<BunshinCloneOptions>,
 ): BunshinCloneOptions {
-  let { preserveDescriptors = false, strictDescriptors = false } = options;
+  let {
+    preserveBufferSharing = false,
+    preserveDescriptors = false,
+    strictDescriptors = false,
+  } = options;
+
+  if (typeof preserveBufferSharing !== 'boolean') {
+    console.warn('Invalid preserveBufferSharing option. Fallback: false.');
+    preserveBufferSharing = false;
+  }
 
   if (typeof preserveDescriptors !== 'boolean') {
     console.warn('Invalid preserveDescriptors option. Fallback: false.');
@@ -335,5 +381,5 @@ function resolveOptions(
     strictDescriptors = false;
   }
 
-  return { preserveDescriptors, strictDescriptors };
+  return { preserveBufferSharing, preserveDescriptors, strictDescriptors };
 }

@@ -34,10 +34,15 @@ bunshinClone(source, options);
 
 ```ts
 interface BunshinCloneOptions {
-  preserveDescriptors: boolean; // default: false
-  strictDescriptors: boolean;   // default: false
+  preserveBufferSharing: boolean; // default: false
+  preserveDescriptors: boolean;   // default: false
+  strictDescriptors: boolean;     // default: false
 }
 ```
+
+### `preserveBufferSharing`
+
+If `true`, preserves shared backing buffers between TypedArray and DataView instances.
 
 ### `preserveDescriptors`
 
