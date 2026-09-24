@@ -30,7 +30,7 @@ export function bunshinClone<T>(
   options: Partial<BunshinCloneOptions> = EMPTY_OPTIONS,
   refs: Refs = new WeakMap(),
 ): T {
-  return clone(source, resolveOptions(options), refs);
+  return clone<T>(source, resolveOptions(options), refs);
 }
 
 function clone<T>(source: T, settings: BunshinCloneOptions, refs: Refs): T {
@@ -137,7 +137,7 @@ function clone<T>(source: T, settings: BunshinCloneOptions, refs: Refs): T {
     // TypedArray
     const view = source as unknown as TypedArray;
 
-    // TypedArray - unpreserve buffer sharing (fast)
+    // Do not preserve buffer sharing; faster (default)
     if (!settings.preserveBufferSharing) {
       const Ctor = view.constructor as new (source: TypedArray) => TypedArray;
       const result = new Ctor(view);
@@ -145,7 +145,7 @@ function clone<T>(source: T, settings: BunshinCloneOptions, refs: Refs): T {
       return result as T;
     }
 
-    // TypedArray - preserve buffer sharing (slow)
+    // Preserve buffer sharing; slower (optional)
     const Ctor = view.constructor as new (
       buffer: ArrayBufferLike,
       byteOffset: number,
