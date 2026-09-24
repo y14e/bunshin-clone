@@ -39,10 +39,8 @@ function clone<T>(source: T, settings: BunshinCloneOptions, refs: Refs): T {
   }
 
   // [Refs]
-  const ref = refs.get(source) as T | undefined;
-
-  if (ref !== undefined) {
-    return ref;
+  if (refs.has(source)) {
+    return refs.get(source) as T;
   }
 
   // With descriptors
@@ -206,10 +204,8 @@ function clone<T>(source: T, settings: BunshinCloneOptions, refs: Refs): T {
 }
 
 function cloneBuffer(buffer: ArrayBufferLike, refs: Refs): ArrayBufferLike {
-  const ref = refs.get(buffer) as ArrayBufferLike | undefined;
-
-  if (ref !== undefined) {
-    return ref;
+  if (refs.has(buffer)) {
+    return refs.get(buffer) as ArrayBufferLike;
   }
 
   const result = buffer.slice(0);
