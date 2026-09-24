@@ -23,7 +23,7 @@ import { bunshinClone } from 'https://esm.unpkg.com/bunshin-clone@<x.x.x>';
 ## 📦 APIs
 
 ```ts
-bunshinClone(source, options);
+bunshinClone<T>(source, options);
 // => T
 //
 // source: T
