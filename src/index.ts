@@ -62,7 +62,7 @@ function clone<T>(source: T, settings: BunshinCloneOptions, refs: Refs): T {
 
   // Plain object
   if (isPlainObject(source)) {
-    const result = Object.create(Object.getPrototypeOf(source));
+    const result: PlainObject = Object.create(Object.getPrototypeOf(source));
     refs.set(source, result); // [Refs]
 
     for (const key in source) {
@@ -251,7 +251,7 @@ function cloneWithDescriptors(
   settings: BunshinCloneOptions,
   refs: Refs,
 ): PlainObject {
-  const result = Object.create(Object.getPrototypeOf(source));
+  const result: PlainObject = Object.create(Object.getPrototypeOf(source));
   refs.set(source, result); // [Refs]
   const descs = Object.getOwnPropertyDescriptors(source);
 
