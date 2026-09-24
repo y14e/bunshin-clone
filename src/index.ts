@@ -30,7 +30,7 @@ export function bunshinClone<T>(
   options: Partial<BunshinCloneOptions> = EMPTY_OPTIONS,
   refs: Refs = new WeakMap(),
 ): T {
-  return clone<T>(source, resolveOptions(options), refs);
+  return clone(source, resolveOptions(options), refs);
 }
 
 function clone<T>(source: T, settings: BunshinCloneOptions, refs: Refs): T {
