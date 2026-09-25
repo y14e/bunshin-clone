@@ -23,7 +23,6 @@ type TypedArray =
   | BigUint64Array;
 
 const EMPTY_OPTIONS = {};
-const { hasOwnProperty: HAS_OWN } = Object.prototype;
 
 export function bunshinClone<T>(
   value: T,
@@ -66,8 +65,11 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
     const result: PlainObject = Object.create(Object.getPrototypeOf(value));
     refs.set(value, result); // [Refs]
 
-    for (const key in value) {
-      if (HAS_OWN.call(value, key) && !isUnsafeKey(key)) {
+    for (const key of Reflect.ownKeys(value)) {
+      if (
+        !isUnsafeKey(key) &&
+        Object.prototype.propertyIsEnumerable.call(value, key)
+      ) {
         result[key] = clone(value[key], settings, refs);
       }
     }
