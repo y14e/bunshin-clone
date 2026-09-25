@@ -51,7 +51,7 @@ function clone<T>(source: T, settings: BunshinCloneOptions, refs: Refs): T {
   // Array
   if (Array.isArray(source)) {
     const { length } = source;
-    const result: T[] = new Array(length);
+    const result = new Array<unknown>(length);
     refs.set(source, result); // [Refs]
 
     for (let i = 0; i < length; i++) {
@@ -77,7 +77,7 @@ function clone<T>(source: T, settings: BunshinCloneOptions, refs: Refs): T {
 
   // Map
   if (source instanceof Map) {
-    const result = new Map();
+    const result = new Map<unknown, unknown>();
     refs.set(source, result); // [Refs]
 
     for (const [key, value] of source) {
@@ -89,7 +89,7 @@ function clone<T>(source: T, settings: BunshinCloneOptions, refs: Refs): T {
 
   // Set
   if (source instanceof Set) {
-    const result = new Set();
+    const result = new Set<unknown>();
     refs.set(source, result); // [Refs]
 
     for (const item of source) {
@@ -140,7 +140,7 @@ function clone<T>(source: T, settings: BunshinCloneOptions, refs: Refs): T {
 
     // Do not preserve buffer sharing; faster (default)
     if (!settings.preserveBufferSharing) {
-      const Ctor = view.constructor as new (source: TypedArray) => TypedArray;
+      const Ctor = view.constructor as new (_: TypedArray) => TypedArray;
       const result = new Ctor(view);
       refs.set(source, result); // [Refs]
       return result as T;
