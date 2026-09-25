@@ -50,10 +50,11 @@ function clone<T>(source: T, settings: BunshinCloneOptions, refs: Refs): T {
 
   // Array
   if (Array.isArray(source)) {
-    const result: unknown[] = [];
+    const { length } = source;
+    const result: T[] = new Array(length);
     refs.set(source, result); // [Refs]
 
-    for (let i = 0, l = source.length; i < l; i++) {
+    for (let i = 0; i < length; i++) {
       result[i] = clone(source[i], settings, refs);
     }
 
