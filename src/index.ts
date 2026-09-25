@@ -26,49 +26,49 @@ const EMPTY_OPTIONS = {};
 const { hasOwnProperty: HAS_OWN } = Object.prototype;
 
 export function bunshinClone<T>(
-  source: T,
+  value: T,
   options: Partial<BunshinCloneOptions> = EMPTY_OPTIONS,
   refs: Refs = new WeakMap(),
 ): T {
-  return clone(source, resolveOptions(options), refs);
+  return clone(value, resolveOptions(options), refs);
 }
 
-function clone<T>(source: T, settings: BunshinCloneOptions, refs: Refs): T {
-  if (!isObject(source)) {
-    return source;
+function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
+  if (!isObject(value)) {
+    return value;
   }
 
   // [Refs]
-  if (refs.has(source)) {
-    return refs.get(source) as T;
+  if (refs.has(value)) {
+    return refs.get(value) as T;
   }
 
   // With descriptors
-  if (settings.preserveDescriptors && isPlainObject(source)) {
-    return cloneWithDescriptors(source, settings, refs) as T;
+  if (settings.preserveDescriptors && isPlainObject(value)) {
+    return cloneWithDescriptors(value, settings, refs) as T;
   }
 
   // Array
-  if (Array.isArray(source)) {
-    const { length } = source;
+  if (Array.isArray(value)) {
+    const { length } = value;
     const result = new Array<unknown>(length);
-    refs.set(source, result); // [Refs]
+    refs.set(value, result); // [Refs]
 
     for (let i = 0; i < length; i++) {
-      result[i] = clone(source[i], settings, refs);
+      result[i] = clone(value[i], settings, refs);
     }
 
     return result as T;
   }
 
   // Plain object
-  if (isPlainObject(source)) {
-    const result: PlainObject = Object.create(Object.getPrototypeOf(source));
-    refs.set(source, result); // [Refs]
+  if (isPlainObject(value)) {
+    const result: PlainObject = Object.create(Object.getPrototypeOf(value));
+    refs.set(value, result); // [Refs]
 
-    for (const key in source) {
-      if (HAS_OWN.call(source, key) && !isUnsafeKey(key)) {
-        result[key] = clone(source[key], settings, refs);
+    for (const key in value) {
+      if (HAS_OWN.call(value, key) && !isUnsafeKey(key)) {
+        result[key] = clone(value[key], settings, refs);
       }
     }
 
@@ -76,23 +76,23 @@ function clone<T>(source: T, settings: BunshinCloneOptions, refs: Refs): T {
   }
 
   // Map
-  if (source instanceof Map) {
+  if (value instanceof Map) {
     const result = new Map<unknown, unknown>();
-    refs.set(source, result); // [Refs]
+    refs.set(value, result); // [Refs]
 
-    for (const [key, value] of source) {
-      result.set(clone(key, settings, refs), clone(value, settings, refs));
+    for (const [key, v] of value) {
+      result.set(clone(key, settings, refs), clone(v, settings, refs));
     }
 
     return result as T;
   }
 
   // Set
-  if (source instanceof Set) {
+  if (value instanceof Set) {
     const result = new Set<unknown>();
-    refs.set(source, result); // [Refs]
+    refs.set(value, result); // [Refs]
 
-    for (const item of source) {
+    for (const item of value) {
       result.add(clone(item, settings, refs));
     }
 
@@ -100,49 +100,49 @@ function clone<T>(source: T, settings: BunshinCloneOptions, refs: Refs): T {
   }
 
   // Date
-  if (source instanceof Date) {
-    const result = new Date(source.getTime());
-    refs.set(source, result); // [Refs]
+  if (value instanceof Date) {
+    const result = new Date(value.getTime());
+    refs.set(value, result); // [Refs]
     return result as T;
   }
 
   // RegExp
-  if (source instanceof RegExp) {
-    const result = new RegExp(source.source, source.flags);
-    refs.set(source, result); // [Refs]
-    result.lastIndex = source.lastIndex;
+  if (value instanceof RegExp) {
+    const result = new RegExp(value.source, value.flags);
+    refs.set(value, result); // [Refs]
+    result.lastIndex = value.lastIndex;
     return result as T;
   }
 
   // ArrayBuffer
-  if (source instanceof ArrayBuffer) {
-    const result = source.slice(0);
-    refs.set(source, result); // [Refs]
+  if (value instanceof ArrayBuffer) {
+    const result = value.slice(0);
+    refs.set(value, result); // [Refs]
     return result as T;
   }
 
   // DataView and TypedArray
-  if (ArrayBuffer.isView(source)) {
+  if (ArrayBuffer.isView(value)) {
     // DataView
-    if (source instanceof DataView) {
-      const { buffer, byteOffset, byteLength } = source;
+    if (value instanceof DataView) {
+      const { buffer, byteOffset, byteLength } = value;
       const result = new DataView(
         cloneBuffer(buffer, refs),
         byteOffset,
         byteLength,
       );
-      refs.set(source, result); // [Refs]
+      refs.set(value, result); // [Refs]
       return result as T;
     }
 
     // TypedArray
-    const view = source as unknown as TypedArray;
+    const view = value as unknown as TypedArray;
 
     // Do not preserve buffer sharing; faster (default)
     if (!settings.preserveBufferSharing) {
       const Ctor = view.constructor as new (_: TypedArray) => TypedArray;
       const result = new Ctor(view);
-      refs.set(source, result); // [Refs]
+      refs.set(value, result); // [Refs]
       return result as T;
     }
 
@@ -154,54 +154,54 @@ function clone<T>(source: T, settings: BunshinCloneOptions, refs: Refs): T {
     ) => TypedArray;
     const { buffer, byteOffset, length } = view;
     const result = new Ctor(cloneBuffer(buffer, refs), byteOffset, length);
-    refs.set(source, result); // [Refs]
+    refs.set(value, result); // [Refs]
     return result as T;
   }
 
   // DOMException and Error
-  if (source instanceof DOMException || source instanceof Error) {
-    return cloneError(source, settings, refs) as T;
+  if (value instanceof DOMException || value instanceof Error) {
+    return cloneError(value, settings, refs) as T;
   }
 
   // Blob
-  if (source instanceof Blob) {
-    const result = source.slice(0, source.size, source.type);
-    refs.set(source, result); // [Refs]
+  if (value instanceof Blob) {
+    const result = value.slice(0, value.size, value.type);
+    refs.set(value, result); // [Refs]
     return result as T;
   }
 
   // ImageData
-  if (typeof ImageData !== 'undefined' && source instanceof ImageData) {
-    const { data, width, height, colorSpace } = source;
+  if (typeof ImageData !== 'undefined' && value instanceof ImageData) {
+    const { data, width, height, colorSpace } = value;
     const result = new ImageData(new Uint8ClampedArray(data), width, height, {
       colorSpace,
     });
-    refs.set(source, result); // [Refs]
+    refs.set(value, result); // [Refs]
     return result as T;
   }
 
   // URL
-  if (source instanceof URL) {
-    const result = new URL(source.href);
-    refs.set(source, result); // [Refs]
+  if (value instanceof URL) {
+    const result = new URL(value.href);
+    refs.set(value, result); // [Refs]
     return result as T;
   }
 
   // URLSearchParams
-  if (source instanceof URLSearchParams) {
+  if (value instanceof URLSearchParams) {
     const result = new URLSearchParams();
-    refs.set(source, result); // [Refs]
+    refs.set(value, result); // [Refs]
 
-    for (const [key, value] of source) {
-      result.append(key, value);
+    for (const [key, v] of value) {
+      result.append(key, v);
     }
 
     return result as T;
   }
 
   // Fallback: unsupported types
-  refs.set(source, source); // [Refs]
-  return source;
+  refs.set(value, value); // [Refs]
+  return value;
 }
 
 function cloneBuffer(buffer: ArrayBufferLike, refs: Refs): ArrayBufferLike {
@@ -215,20 +215,20 @@ function cloneBuffer(buffer: ArrayBufferLike, refs: Refs): ArrayBufferLike {
 }
 
 function cloneError(
-  source: DOMException | Error,
+  error: DOMException | Error,
   settings: BunshinCloneOptions,
   refs: Refs,
 ): DOMException | Error {
-  const result = createErrorInstance(source, settings, refs);
-  refs.set(source, result); // [Refs]
+  const result = createErrorInstance(error, settings, refs);
+  refs.set(error, result); // [Refs]
 
   // DOMException
-  if (source instanceof DOMException) {
+  if (error instanceof DOMException) {
     return result;
   }
 
   // Error
-  const { stack, cause } = source;
+  const { stack, cause } = error;
 
   if (stack) {
     try {
@@ -236,25 +236,25 @@ function cloneError(
     } catch {}
   }
 
-  if ('cause' in source && cause !== undefined) {
+  if ('cause' in error && cause !== undefined) {
     result.cause = clone(cause, settings, refs);
   }
 
-  for (const key of Object.keys(source)) {
-    Reflect.set(result, key, clone(Reflect.get(source, key), settings, refs));
+  for (const key of Object.keys(error)) {
+    Reflect.set(result, key, clone(Reflect.get(error, key), settings, refs));
   }
 
   return result;
 }
 
 function cloneWithDescriptors(
-  source: PlainObject,
+  object: PlainObject,
   settings: BunshinCloneOptions,
   refs: Refs,
 ): PlainObject {
-  const result: PlainObject = Object.create(Object.getPrototypeOf(source));
-  refs.set(source, result); // [Refs]
-  const descs = Object.getOwnPropertyDescriptors(source);
+  const result: PlainObject = Object.create(Object.getPrototypeOf(object));
+  refs.set(object, result); // [Refs]
+  const descs = Object.getOwnPropertyDescriptors(object);
 
   forEachOwnKey(descs, (key) => {
     if (isUnsafeKey(key)) {
@@ -289,21 +289,21 @@ const ERROR_CTORS: Record<string, new (message?: string) => Error> = {
 };
 
 function createErrorInstance(
-  source: DOMException | Error,
+  error: DOMException | Error,
   settings: BunshinCloneOptions,
   refs: Refs,
 ): DOMException | Error {
-  const { message, name } = source;
+  const { message, name } = error;
 
   // DOMException
-  if (source instanceof DOMException) {
+  if (error instanceof DOMException) {
     return new DOMException(message, name);
   }
 
   // AggregateError
-  if (source instanceof AggregateError) {
+  if (error instanceof AggregateError) {
     return new AggregateError(
-      source.errors.map((e) => clone(e, settings, refs)),
+      error.errors.map((e) => clone(e, settings, refs)),
       message,
     );
   }

@@ -23,10 +23,10 @@ import { bunshinClone } from 'https://esm.unpkg.com/bunshin-clone@<x.x.x>';
 ## 📦 APIs
 
 ```ts
-bunshinClone<T>(source, options);
+bunshinClone<T>(value, options);
 // => T
 //
-// source: T
+// value: T
 // options (optional): BunshinCloneOptions
 ```
 
