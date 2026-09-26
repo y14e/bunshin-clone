@@ -21,6 +21,7 @@ type TypedArray =
   | BigUint64Array;
 
 const EMPTY_OPTIONS = {};
+const { propertyIsEnumerable: IS_ENUMERABLE } = Object.prototype;
 
 export function bunshinClone<T>(
   value: T,
@@ -36,8 +37,10 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
   }
 
   // [Refs]
-  if (refs.has(value)) {
-    return refs.get(value) as T;
+  const ref = refs.get(value);
+
+  if (ref !== undefined) {
+    return ref as T;
   }
 
   // With descriptors
@@ -64,10 +67,7 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
     refs.set(value, result); // [Refs]
 
     for (const key of Reflect.ownKeys(value)) {
-      if (
-        !isUnsafeKey(key) &&
-        Object.prototype.propertyIsEnumerable.call(value, key)
-      ) {
+      if (!isUnsafeKey(key) && IS_ENUMERABLE.call(value, key)) {
         result[key] = clone(value[key], settings, refs);
       }
     }
@@ -205,7 +205,9 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
 }
 
 function cloneBuffer(buffer: ArrayBufferLike, refs: Refs): ArrayBufferLike {
-  if (refs.has(buffer)) {
+  const ref = refs.get(buffer);
+
+  if (ref !== undefined) {
     return refs.get(buffer) as ArrayBufferLike;
   }
 

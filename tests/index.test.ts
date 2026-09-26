@@ -199,101 +199,93 @@ describe('bunshinClone', () => {
     expect(Object.getOwnPropertyDescriptor(result, 'x')?.get).toBeDefined();
   });
 
-  describe('default mode key selection (Reflect.ownKeys + enumerable filter)', () => {
-    test('enumerable symbol-keyed property is cloned by default', () => {
-      const sym = Symbol('k');
-      const source = { [sym]: { nested: 1 }, normal: 'x' };
+  test('enumerable symbol-keyed property is cloned by default', () => {
+    const sym = Symbol('k');
+    const source = { [sym]: { nested: 1 }, normal: 'x' };
 
-      const result = bunshinClone(source);
+    const result = bunshinClone(source);
 
-      expect(result[sym]).toEqual({ nested: 1 });
-      expect(result[sym]).not.toBe(source[sym]);
+    expect(result[sym]).toEqual({ nested: 1 });
+    expect(result[sym]).not.toBe(source[sym]);
+  });
+
+  test('non-enumerable symbol-keyed property is excluded by default', () => {
+    const sym = Symbol('hidden');
+    const source = {};
+    Object.defineProperty(source, sym, {
+      enumerable: false,
+      value: 'secret',
     });
 
-    test('non-enumerable symbol-keyed property is excluded by default', () => {
-      const sym = Symbol('hidden');
-      const source = {};
-      Object.defineProperty(source, sym, {
-        value: 'secret',
-        enumerable: false,
-      });
+    const result = bunshinClone(source);
 
-      const result = bunshinClone(source);
+    expect(Object.hasOwn(result, sym)).toBe(false);
+  });
 
-      expect(Object.prototype.hasOwnProperty.call(result, sym)).toBe(false);
+  test('non-enumerable string property is excluded by default', () => {
+    const source = {};
+    Object.defineProperty(source, 'hidden', {
+      configurable: true,
+      enumerable: false,
+      value: 42,
+      writable: true,
     });
 
-    test('non-enumerable string property is excluded by default', () => {
-      const source = {};
-      Object.defineProperty(source, 'hidden', {
-        value: 42,
-        enumerable: false,
-        writable: true,
-        configurable: true,
-      });
+    const result = bunshinClone(source) as any;
 
-      const result = bunshinClone(source) as any;
+    expect(Object.hasOwn(result, 'hidden')).toBe(false);
+  });
 
-      expect(Object.prototype.hasOwnProperty.call(result, 'hidden')).toBe(
-        false,
-      );
+  test('non-enumerable getter is excluded by default (does not get flattened)', () => {
+    const source = {};
+    Object.defineProperty(source, 'computed', {
+      configurable: true,
+      enumerable: false,
+      get: () => 'computed-value',
     });
 
-    test('non-enumerable getter is excluded by default (does not get flattened)', () => {
-      const source = {};
-      Object.defineProperty(source, 'computed', {
-        get: () => 'computed-value',
-        enumerable: false,
-        configurable: true,
-      });
+    const result = bunshinClone(source) as any;
 
-      const result = bunshinClone(source) as any;
+    expect(Object.hasOwn(result, 'computed')).toBe(false);
+  });
 
-      expect(Object.prototype.hasOwnProperty.call(result, 'computed')).toBe(
-        false,
-      );
+  test('enumerable getter is still flattened to a plain value by default', () => {
+    const source = {
+      get computed() {
+        return 'computed-value';
+      },
+    };
+
+    const result = bunshinClone(source) as any;
+    const desc = Object.getOwnPropertyDescriptor(result, 'computed');
+
+    expect(result.computed).toBe('computed-value');
+    expect(desc?.get).toBeUndefined();
+  });
+
+  test('preserveDescriptors: true still preserves non-enumerable properties', () => {
+    const source = {};
+    Object.defineProperty(source, 'hidden', {
+      configurable: true,
+      enumerable: false,
+      value: 42,
+      writable: true,
     });
 
-    test('enumerable getter is still flattened to a plain value by default', () => {
-      const source = {
-        get computed() {
-          return 'computed-value';
-        },
-      };
+    const result = bunshinClone(source, { preserveDescriptors: true }) as any;
+    const desc = Object.getOwnPropertyDescriptor(result, 'hidden');
 
-      const result = bunshinClone(source) as any;
-      const desc = Object.getOwnPropertyDescriptor(result, 'computed');
+    expect(desc?.value).toBe(42);
+    expect(desc?.enumerable).toBe(false);
+  });
 
-      expect(result.computed).toBe('computed-value');
-      expect(desc?.get).toBeUndefined();
-    });
+  test('__proto__ key from Reflect.ownKeys is still skipped (prototype pollution guard)', () => {
+    const malicious = JSON.parse('{"__proto__": {"polluted": true}}');
 
-    test('preserveDescriptors: true still preserves non-enumerable properties', () => {
-      const source = {};
-      Object.defineProperty(source, 'hidden', {
-        value: 42,
-        enumerable: false,
-        writable: true,
-        configurable: true,
-      });
+    const result = bunshinClone(malicious) as any;
 
-      const result = bunshinClone(source, { preserveDescriptors: true }) as any;
-      const desc = Object.getOwnPropertyDescriptor(result, 'hidden');
-
-      expect(desc?.value).toBe(42);
-      expect(desc?.enumerable).toBe(false);
-    });
-
-    test('__proto__ key from Reflect.ownKeys is still skipped (prototype pollution guard)', () => {
-      const malicious = JSON.parse('{"__proto__": {"polluted": true}}');
-
-      const result = bunshinClone(malicious) as any;
-
-      expect(({} as any).polluted).toBeUndefined();
-      expect(Object.prototype.hasOwnProperty.call(result, '__proto__')).toBe(
-        false,
-      );
-    });
+    expect(({} as any).polluted).toBeUndefined();
+    expect(Object.hasOwn(result, '__proto__')).toBe(false);
   });
 
   test('unsupported types: return as-is', () => {
@@ -303,4 +295,3 @@ describe('bunshinClone', () => {
     expect(result).toBe(fn);
   });
 });
-
