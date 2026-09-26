@@ -5,9 +5,7 @@ export interface BunshinCloneOptions {
 }
 
 type PlainObject = Record<PropertyKey, unknown>;
-
 type Refs = WeakMap<object, unknown>;
-
 type TypedArray =
   | Int8Array
   | Uint8Array
