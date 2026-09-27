@@ -1,6 +1,6 @@
 {
   "name": "bunshin-clone",
-  "version": "1.8.1",
+  "version": "1.8.2",
   "description": "High-performance deep clone utility with descriptor support",
   "keywords": [
     "array",
@@ -75,6 +75,6 @@
     "esbuild": true
   },
   "dependencies": {
-    "bunshin-clone-npm": "npm:bunshin-clone@^1.8.0"
+    "bunshin-clone-npm": "npm:bunshin-clone@^1.8.1"
   }
 }

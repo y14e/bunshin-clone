@@ -46,48 +46,12 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
 
   // Array
   if (Array.isArray(value)) {
-    // Fast path: shallow copyable array
-    if (isShallowArray(value)) {
-      const result = value.slice() as T;
-      refs.set(value, result);
-      return result;
-    }
-
-    const { length } = value;
-    const result = new Array<unknown>(length);
-    refs.set(value, result); // [Refs]
-
-    for (let i = 0; i < length; i++) {
-      result[i] = clone(value[i], settings, refs);
-    }
-
-    return result as T;
+    return cloneArray(value, settings, refs) as T;
   }
 
   // Plain object
   if (isPlainObject(value)) {
-    const result: PlainObject = Object.create(Object.getPrototypeOf(value));
-    refs.set(value, result); // [Refs]
-
-    if (!settings.preserveSymbolKeys) {
-      for (const key in value) {
-        if (isUnsafeKey(key) || !Object.hasOwn(value, key)) {
-          continue;
-        }
-
-        result[key] = clone(value[key], settings, refs);
-      }
-    } else {
-      for (const key of Reflect.ownKeys(value)) {
-        if (isUnsafeKey(key) || !Object.propertyIsEnumerable.call(value, key)) {
-          continue;
-        }
-
-        result[key] = clone(value[key], settings, refs);
-      }
-    }
-
-    return result as T;
+    return clonePlainObject(value, settings, refs) as T;
   }
 
   // Map
@@ -136,44 +100,16 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
     return result as T;
   }
 
-  // DataView and TypedArray
+  // ArrayBuffer view (DataView/TypedArray)
   if (ArrayBuffer.isView(value)) {
-    // DataView
-    if (value instanceof DataView) {
-      const { buffer, byteOffset, byteLength } = value;
-      const result = new DataView(
-        cloneBuffer(buffer, refs),
-        byteOffset,
-        byteLength,
-      );
-      refs.set(value, result); // [Refs]
-      return result as T;
-    }
-
-    // TypedArray
-    const view = value as unknown as TypedArray;
-
-    // Do not preserve buffer sharing; faster (default)
-    if (!settings.preserveBufferSharing) {
-      const Ctor = view.constructor as new (_: TypedArray) => TypedArray;
-      const result = new Ctor(view);
-      refs.set(value, result); // [Refs]
-      return result as T;
-    }
-
-    // Preserve buffer sharing; slower (optional)
-    const Ctor = view.constructor as new (
-      buffer: ArrayBufferLike,
-      byteOffset: number,
-      length: number,
-    ) => TypedArray;
-    const { buffer, byteOffset, length } = view;
-    const result = new Ctor(cloneBuffer(buffer, refs), byteOffset, length);
-    refs.set(value, result); // [Refs]
-    return result as T;
+    return cloneArrayBufferView(
+      value as unknown as DataView | TypedArray,
+      settings,
+      refs,
+    ) as T;
   }
 
-  // DOMException and Error
+  // DOMException/Error
   if (value instanceof DOMException || value instanceof Error) {
     return cloneError(value, settings, refs) as T;
   }
@@ -219,6 +155,129 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
   return value;
 }
 
+function cloneWithDescriptors(
+  object: PlainObject,
+  settings: BunshinCloneOptions,
+  refs: Refs,
+): PlainObject {
+  const result: PlainObject = Object.create(Object.getPrototypeOf(object));
+  refs.set(object, result); // [Refs]
+  const descs = Object.getOwnPropertyDescriptors(object);
+
+  forEachOwnKey(descs, (key) => {
+    if (isUnsafeKey(key)) {
+      return;
+    }
+
+    const desc = { ...descs[key] };
+
+    if ('value' in desc) {
+      desc.value = clone(desc.value, settings, refs);
+    }
+
+    try {
+      Object.defineProperty(result, key, desc);
+    } catch (error) {
+      if (settings.strictDescriptors) {
+        throw error;
+      }
+    }
+  });
+
+  return result;
+}
+
+function cloneArray(
+  array: unknown[],
+  settings: BunshinCloneOptions,
+  refs: Refs,
+): unknown[] {
+  // Fast path: shallow copyable array
+  if (isShallowArray(array)) {
+    const result = array.slice();
+    refs.set(array, result);
+    return result;
+  }
+
+  const { length } = array;
+  const result = new Array<unknown>(length);
+  refs.set(array, result); // [Refs]
+
+  for (let i = 0; i < length; i++) {
+    result[i] = clone(array[i], settings, refs);
+  }
+
+  return result;
+}
+
+function clonePlainObject(
+  object: PlainObject,
+  settings: BunshinCloneOptions,
+  refs: Refs,
+): PlainObject {
+  const result: PlainObject = Object.create(Object.getPrototypeOf(object));
+  refs.set(object, result); // [Refs]
+
+  if (!settings.preserveSymbolKeys) {
+    for (const key in object) {
+      if (isUnsafeKey(key) || !Object.hasOwn(object, key)) {
+        continue;
+      }
+
+      result[key] = clone(object[key], settings, refs);
+    }
+  } else {
+    for (const key of Reflect.ownKeys(object)) {
+      if (isUnsafeKey(key) || !Object.propertyIsEnumerable.call(object, key)) {
+        continue;
+      }
+
+      result[key] = clone(object[key], settings, refs);
+    }
+  }
+
+  return result;
+}
+
+function cloneArrayBufferView(
+  view: DataView | TypedArray,
+  settings: BunshinCloneOptions,
+  refs: Refs,
+): DataView | TypedArray {
+  // DataView
+  if (view instanceof DataView) {
+    const { buffer, byteOffset, byteLength } = view;
+    const result = new DataView(
+      cloneBuffer(buffer, refs),
+      byteOffset,
+      byteLength,
+    );
+    refs.set(view, result); // [Refs]
+    return result;
+  }
+
+  // TypedArray
+
+  // Do not preserve buffer sharing; faster (default)
+  if (!settings.preserveBufferSharing) {
+    const Ctor = view.constructor as new (_: TypedArray) => TypedArray;
+    const result = new Ctor(view);
+    refs.set(view, result); // [Refs]
+    return result;
+  }
+
+  // Preserve buffer sharing; slower (optional)
+  const Ctor = view.constructor as new (
+    buffer: ArrayBufferLike,
+    byteOffset: number,
+    length: number,
+  ) => TypedArray;
+  const { buffer, byteOffset, length } = view;
+  const result = new Ctor(cloneBuffer(buffer, refs), byteOffset, length);
+  refs.set(view, result); // [Refs]
+  return result;
+}
+
 function cloneBuffer(buffer: ArrayBufferLike, refs: Refs): ArrayBufferLike {
   if (refs.has(buffer)) {
     return refs.get(buffer) as ArrayBufferLike;
@@ -258,38 +317,6 @@ function cloneError(
   for (const key of Object.keys(error)) {
     Reflect.set(result, key, clone(Reflect.get(error, key), settings, refs));
   }
-
-  return result;
-}
-
-function cloneWithDescriptors(
-  object: PlainObject,
-  settings: BunshinCloneOptions,
-  refs: Refs,
-): PlainObject {
-  const result: PlainObject = Object.create(Object.getPrototypeOf(object));
-  refs.set(object, result); // [Refs]
-  const descs = Object.getOwnPropertyDescriptors(object);
-
-  forEachOwnKey(descs, (key) => {
-    if (isUnsafeKey(key)) {
-      return;
-    }
-
-    const desc = { ...descs[key] };
-
-    if ('value' in desc) {
-      desc.value = clone(desc.value, settings, refs);
-    }
-
-    try {
-      Object.defineProperty(result, key, desc);
-    } catch (error) {
-      if (settings.strictDescriptors) {
-        throw error;
-      }
-    }
-  });
 
   return result;
 }
