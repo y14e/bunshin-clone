@@ -1,21 +1,22 @@
 /*
 
 # Install
-npm i tsx bunshin-clone tinybench lodash.clonedeep @types/lodash.clonedeep rfdc klona
+npm i tsx bunshin-clone-npm@npm:bunshin-clone tinybench lodash.clonedeep @types/lodash.clonedeep rfdc klona
 
 # Run
 npx tsx run.ts
 
 # Cleanup
-npm un tsx bunshin-clone tinybench lodash.clonedeep @types/lodash.clonedeep rfdc klona
+npm un tsx bunshin-clone-npm@npm:bunshin-clone tinybench lodash.clonedeep @types/lodash.clonedeep rfdc klona
 
 */
 
+import { bunshinClone as bunshinCloneDev } from '../dist/index.js';
+import { bunshinClone as bunshinClone } from 'bunshin-clone-npm';
 import { klona } from 'klona';
 import cloneDeep from 'lodash.clonedeep';
 import rfdc from 'rfdc';
 import { Bench } from 'tinybench';
-import { bunshinClone } from 'bunshin-clone';
 
 let sink: unknown;
 
@@ -59,11 +60,14 @@ async function run(name: string, value: unknown): Promise<void> {
   console.log(`\n=== ${name} ===`);
 
   const bench = new Bench({
-    time: 500,
-    warmupTime: 500,
+    time: 100,
+    warmupTime: 100,
   });
 
   bench
+    .add('bunshin-clone (dev)', () => {
+      sink = bunshinCloneDev(value);
+    })
     .add('bunshin-clone', () => {
       sink = bunshinClone(value);
     })
@@ -93,11 +97,14 @@ async function runCircular(name: string, value: unknown): Promise<void> {
   console.log(`\n=== ${name} ===`);
 
   const bench = new Bench({
-    time: 500,
-    warmupTime: 500,
+    time: 100,
+    warmupTime: 100,
   });
 
   bench
+    .add('bunshin-clone (dev)', () => {
+      sink = bunshinCloneDev(value);
+    })
     .add('bunshin-clone', () => {
       sink = bunshinClone(value);
     })
@@ -127,13 +134,21 @@ async function runDescriptors(name: string, value: unknown): Promise<void> {
   console.log(`\n=== ${name} ===`);
 
   const bench = new Bench({
-    time: 500,
-    warmupTime: 500,
+    time: 100,
+    warmupTime: 100,
   });
 
   bench
+    .add('bunshin-clone (dev): default', () => {
+      sink = bunshinCloneDev(value);
+    })
     .add('bunshin-clone: default', () => {
       sink = bunshinClone(value);
+    })
+    .add('bunshin-clone (dev): descriptors', () => {
+      sink = bunshinCloneDev(value, {
+        preserveDescriptors: true,
+      });
     })
     .add('bunshin-clone: descriptors', () => {
       sink = bunshinClone(value, {
@@ -150,13 +165,21 @@ async function runBufferSharing(name: string, value: unknown): Promise<void> {
   console.log(`\n=== ${name} ===`);
 
   const bench = new Bench({
-    time: 500,
-    warmupTime: 500,
+    time: 100,
+    warmupTime: 100,
   });
 
   bench
+    .add('bunshin-clone (dev): default', () => {
+      sink = bunshinCloneDev(value);
+    })
     .add('bunshin-clone: default', () => {
       sink = bunshinClone(value);
+    })
+    .add('bunshin-clone (dev): preserveBufferSharing', () => {
+      sink = bunshinCloneDev(value, {
+        preserveBufferSharing: true,
+      });
     })
     .add('bunshin-clone: preserveBufferSharing', () => {
       sink = bunshinClone(value, {
@@ -206,7 +229,7 @@ const nested = {
 
 // Wide object
 const wide = Object.fromEntries(
-  Array.from({ length: 100 }, (_, i) => [
+  Array.from({ length: 50 }, (_, i) => [
     `key${i}`,
     {
       id: i,
@@ -217,7 +240,7 @@ const wide = Object.fromEntries(
 
 // Large object
 const large = Object.fromEntries(
-  Array.from({ length: 1000 }, (_, i) => [
+  Array.from({ length: 500 }, (_, i) => [
     `key${i}`,
     {
       id: i,
@@ -232,10 +255,10 @@ const large = Object.fromEntries(
 );
 
 // Primitive array
-const primitiveArray = Array.from({ length: 1000 }, (_, i) => i);
+const primitiveArray = Array.from({ length: 500 }, (_, i) => i);
 
 // Object array
-const objectArray = Array.from({ length: 1000 }, (_, i) => ({
+const objectArray = Array.from({ length: 500 }, (_, i) => ({
   id: i,
   name: `item-${i}`,
   nested: {
@@ -245,7 +268,7 @@ const objectArray = Array.from({ length: 1000 }, (_, i) => ({
 }));
 
 // Mixed array
-const mixedArray = Array.from({ length: 500 }, (_, i) => [
+const mixedArray = Array.from({ length: 250 }, (_, i) => [
   i,
   `item-${i}`,
   {
@@ -256,7 +279,7 @@ const mixedArray = Array.from({ length: 500 }, (_, i) => [
 
 // Map
 const map = new Map(
-  Array.from({ length: 100 }, (_, i) => [
+  Array.from({ length: 50 }, (_, i) => [
     `key${i}`,
     {
       id: i,
@@ -269,7 +292,7 @@ const map = new Map(
 
 // Set
 const set = new Set(
-  Array.from({ length: 100 }, (_, i) => ({
+  Array.from({ length: 50 }, (_, i) => ({
     id: i,
     value: `value-${i}`,
   })),
@@ -349,13 +372,13 @@ async function main(): Promise<void> {
   await run('large object (1000 properties)', large);
 
   // Arrays
-  await run('primitive array (1000)', primitiveArray);
-  await run('object array (1000)', objectArray);
-  await run('mixed nested array (500)', mixedArray);
+  await run('primitive array (500)', primitiveArray);
+  await run('object array (500)', objectArray);
+  await run('mixed nested array (250)', mixedArray);
 
   // Built-ins
-  await run('Map (100)', map);
-  await run('Set (100)', set);
+  await run('Map (50)', map);
+  await run('Set (50)', set);
   await run('Date / RegExp / URL / URLSearchParams', builtins);
   await run('Float64Array (1000)', typedArray);
 

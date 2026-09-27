@@ -21,13 +21,9 @@ type TypedArray =
   | BigInt64Array
   | BigUint64Array;
 
-const EMPTY_OPTIONS = {};
-const { hasOwnProperty: HAS_OWN, propertyIsEnumerable: IS_ENUMERABLE } =
-  Object.prototype;
-
 export function bunshinClone<T>(
   value: T,
-  options: Partial<BunshinCloneOptions> = EMPTY_OPTIONS,
+  options: Partial<BunshinCloneOptions> = {},
   refs: Refs = new WeakMap(),
 ): T {
   return clone(value, resolveOptions(options), refs);
@@ -39,10 +35,8 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
   }
 
   // [Refs]
-  const ref = refs.get(value);
-
-  if (ref !== undefined) {
-    return ref as T;
+  if (refs.has(value)) {
+    return refs.get(value) as T;
   }
 
   // With descriptors
@@ -52,7 +46,7 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
 
   // Array
   if (Array.isArray(value)) {
-    // Fast path: shallow
+    // Fast path: shallow copyable array
     if (isShallowArray(value)) {
       const result = value.slice() as T;
       refs.set(value, result);
@@ -77,7 +71,7 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
 
     if (!settings.preserveSymbolKeys) {
       for (const key in value) {
-        if (isUnsafeKey(key) || !HAS_OWN.call(value, key)) {
+        if (isUnsafeKey(key) || !Object.hasOwn(value, key)) {
           continue;
         }
 
@@ -85,7 +79,7 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
       }
     } else {
       for (const key of Reflect.ownKeys(value)) {
-        if (isUnsafeKey(key) || !IS_ENUMERABLE.call(value, key)) {
+        if (isUnsafeKey(key) || !Object.propertyIsEnumerable.call(value, key)) {
           continue;
         }
 
@@ -226,9 +220,7 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
 }
 
 function cloneBuffer(buffer: ArrayBufferLike, refs: Refs): ArrayBufferLike {
-  const ref = refs.get(buffer);
-
-  if (ref !== undefined) {
+  if (refs.has(buffer)) {
     return refs.get(buffer) as ArrayBufferLike;
   }
 
@@ -372,13 +364,7 @@ export function isPlainObject(value: unknown): value is PlainObject {
 }
 
 export function isShallowArray(array: unknown[]): boolean {
-  for (let i = 0, l = array.length; i < l; i++) {
-    if (isObject(array[i])) {
-      return false;
-    }
-  }
-
-  return true;
+  return array.every((item) => !isObject(item));
 }
 
 export function isUnsafeKey(key: PropertyKey): boolean {
