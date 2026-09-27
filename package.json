@@ -73,8 +73,5 @@
   },
   "allowScripts": {
     "esbuild": true
-  },
-  "dependencies": {
-    "bunshin-clone-npm": "npm:bunshin-clone@^1.8.1"
   }
 }
