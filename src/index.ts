@@ -50,8 +50,8 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
 
   // Array
   if (Array.isArray(value)) {
-    // Fast path: can shallow clone
-    if (canShallowCloneArray(value)) {
+    // Fast path: shallow clonable
+    if (isShallowClonableArray(value)) {
       const result = value.slice() as T;
       refs.set(value, result);
       return result;
@@ -332,7 +332,7 @@ function createErrorInstance(
   return result;
 }
 
-function canShallowCloneArray(array: unknown[]): boolean {
+function isShallowClonableArray(array: unknown[]): boolean {
   for (let i = 0, l = array.length; i < l; i++) {
     if (isObject(array[i])) {
       return false;
