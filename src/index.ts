@@ -50,6 +50,13 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
 
   // Array
   if (Array.isArray(value)) {
+    // Fast path: can shallow clone
+    if (canShallowCloneArray(value)) {
+      const result = value.slice() as T;
+      refs.set(value, result);
+      return result;
+    }
+
     const { length } = value;
     const result = new Array<unknown>(length);
     refs.set(value, result); // [Refs]
@@ -67,9 +74,11 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
     refs.set(value, result); // [Refs]
 
     for (const key of Reflect.ownKeys(value)) {
-      if (!isUnsafeKey(key) && IS_ENUMERABLE.call(value, key)) {
-        result[key] = clone(value[key], settings, refs);
+      if (isUnsafeKey(key) || !IS_ENUMERABLE.call(value, key)) {
+        continue;
       }
+
+      result[key] = clone(value[key], settings, refs);
     }
 
     return result as T;
@@ -321,6 +330,16 @@ function createErrorInstance(
   const result = new Error(message);
   result.name = name;
   return result;
+}
+
+function canShallowCloneArray(array: unknown[]): boolean {
+  for (let i = 0, l = array.length; i < l; i++) {
+    if (isObject(array[i])) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 export function forEachOwnKey(
