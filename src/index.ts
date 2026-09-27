@@ -1,6 +1,7 @@
 export interface BunshinCloneOptions {
   preserveBufferSharing: boolean;
   preserveDescriptors: boolean;
+  preserveSymbolKeys: boolean;
   strictDescriptors: boolean;
 }
 
@@ -21,7 +22,8 @@ type TypedArray =
   | BigUint64Array;
 
 const EMPTY_OPTIONS = {};
-const { propertyIsEnumerable: IS_ENUMERABLE } = Object.prototype;
+const { hasOwnProperty: HAS_OWN, propertyIsEnumerable: IS_ENUMERABLE } =
+  Object.prototype;
 
 export function bunshinClone<T>(
   value: T,
@@ -73,12 +75,22 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
     const result: PlainObject = Object.create(Object.getPrototypeOf(value));
     refs.set(value, result); // [Refs]
 
-    for (const key of Reflect.ownKeys(value)) {
-      if (isUnsafeKey(key) || !IS_ENUMERABLE.call(value, key)) {
-        continue;
-      }
+    if (!settings.preserveSymbolKeys) {
+      for (const key in value) {
+        if (isUnsafeKey(key) || !HAS_OWN.call(value, key)) {
+          continue;
+        }
 
-      result[key] = clone(value[key], settings, refs);
+        result[key] = clone(value[key], settings, refs);
+      }
+    } else {
+      for (const key of Reflect.ownKeys(value)) {
+        if (isUnsafeKey(key) || !IS_ENUMERABLE.call(value, key)) {
+          continue;
+        }
+
+        result[key] = clone(value[key], settings, refs);
+      }
     }
 
     return result as T;
@@ -383,7 +395,13 @@ function resolveOptions(
     preserveBufferSharing = false,
     preserveDescriptors = false,
     strictDescriptors = false,
+    preserveSymbolKeys = false,
   } = options;
+
+  if (typeof preserveSymbolKeys !== 'boolean') {
+    console.warn('Invalid preserveSymbolKeys option. Fallback: false.');
+    preserveSymbolKeys = false;
+  }
 
   if (typeof preserveBufferSharing !== 'boolean') {
     console.warn('Invalid preserveBufferSharing option. Fallback: false.');
@@ -400,5 +418,10 @@ function resolveOptions(
     strictDescriptors = false;
   }
 
-  return { preserveBufferSharing, preserveDescriptors, strictDescriptors };
+  return {
+    preserveBufferSharing,
+    preserveDescriptors,
+    preserveSymbolKeys,
+    strictDescriptors,
+  };
 }

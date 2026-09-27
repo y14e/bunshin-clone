@@ -36,6 +36,7 @@ bunshinClone<T>(value, options);
 interface BunshinCloneOptions {
   preserveBufferSharing: boolean; // default: false
   preserveDescriptors: boolean;   // default: false
+  preserveSymbolKeys: boolean;    // default: false
   strictDescriptors: boolean;     // default: false
 }
 ```
@@ -48,9 +49,13 @@ If `true`, preserves shared backing buffers between TypedArray and DataView inst
 
 If `true`, preserves property descriptors (getters/setters, etc.).
 
+### `preserveSymbolKeys`
+
+If `true`, preserves symbol keys (slower).
+
 ### `strictDescriptors`
 
-If `true`, throws if descriptor cannot be merged (e.g. non-configurable or non-writable)
+If `true`, throws if descriptor cannot be merged (e.g. non-configurable or non-writable).
 
 ## 📖 Details
 

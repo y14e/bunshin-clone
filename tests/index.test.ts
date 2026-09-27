@@ -141,7 +141,6 @@ describe('bunshinClone', () => {
     expect(result.message).toBe('Multiple errors occurred');
     expect(result.name).toBe('AggregateError');
 
-    // errors 配列とその内部のエラーオブジェクトがクローンされているか
     expect(result.errors).toHaveLength(2);
     expect(result.errors[0]).not.toBe(err1);
     expect(result.errors[0].message).toBe('error 1');
@@ -149,11 +148,9 @@ describe('bunshinClone', () => {
     expect(result.errors[1].message).toBe('error 2');
     expect(result.errors[1].name).toBe('TypeError');
 
-    // cause がディープクローンされているか
     expect(result.cause).not.toBe((source as any).cause);
     expect((result.cause as Error).message).toBe('root cause');
 
-    // カスタムプロパティがディープクローンされているか
     expect(result.customProp).toEqual({ detail: 'extra info' });
     expect(result.customProp).not.toBe((source as any).customProp);
   });
@@ -199,17 +196,30 @@ describe('bunshinClone', () => {
     expect(Object.getOwnPropertyDescriptor(result, 'x')?.get).toBeDefined();
   });
 
-  test('enumerable symbol-keyed property is cloned by default', () => {
+  /* --- Symbol キー関連のテスト (デフォルト false / 明示的 true) --- */
+
+  test('symbol-keyed property is excluded by default (preserveSymbolKeys: false)', () => {
     const sym = Symbol('k');
     const source = { [sym]: { nested: 1 }, normal: 'x' };
 
     const result = bunshinClone(source);
 
+    expect(result.normal).toBe('x');
+    expect(Object.hasOwn(result, sym)).toBe(false);
+  });
+
+  test('preserveSymbolKeys: true clones enumerable symbol-keyed properties', () => {
+    const sym = Symbol('k');
+    const source = { [sym]: { nested: 1 }, normal: 'x' };
+
+    const result = bunshinClone(source, { preserveSymbolKeys: true });
+
+    expect(result.normal).toBe('x');
     expect(result[sym]).toEqual({ nested: 1 });
     expect(result[sym]).not.toBe(source[sym]);
   });
 
-  test('non-enumerable symbol-keyed property is excluded by default', () => {
+  test('non-enumerable symbol-keyed property is excluded even when preserveSymbolKeys: true', () => {
     const sym = Symbol('hidden');
     const source = {};
     Object.defineProperty(source, sym, {
@@ -217,10 +227,12 @@ describe('bunshinClone', () => {
       value: 'secret',
     });
 
-    const result = bunshinClone(source);
+    const result = bunshinClone(source, { preserveSymbolKeys: true });
 
     expect(Object.hasOwn(result, sym)).toBe(false);
   });
+
+  /* --- 非可挙プロパティ / ガードのテスト --- */
 
   test('non-enumerable string property is excluded by default', () => {
     const source = {};
@@ -279,7 +291,7 @@ describe('bunshinClone', () => {
     expect(desc?.enumerable).toBe(false);
   });
 
-  test('__proto__ key from Reflect.ownKeys is still skipped (prototype pollution guard)', () => {
+  test('__proto__ key is skipped (prototype pollution guard)', () => {
     const malicious = JSON.parse('{"__proto__": {"polluted": true}}');
 
     const result = bunshinClone(malicious) as any;
@@ -295,3 +307,4 @@ describe('bunshinClone', () => {
     expect(result).toBe(fn);
   });
 });
+

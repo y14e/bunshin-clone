@@ -11,12 +11,11 @@ npm un tsx bunshin-clone tinybench lodash.clonedeep @types/lodash.clonedeep rfdc
 
 */
 
-import { bunshinClone } from 'bunshin-clone';
-import { bunshinClone as bunshinCloneDev } from '../src/index';
 import { klona } from 'klona';
 import cloneDeep from 'lodash.clonedeep';
 import rfdc from 'rfdc';
 import { Bench } from 'tinybench';
+import { bunshinClone } from '../src/index';
 
 let sink: unknown;
 
@@ -68,9 +67,6 @@ async function run(name: string, value: unknown): Promise<void> {
     .add('bunshin-clone', () => {
       sink = bunshinClone(value);
     })
-    .add('bunshin-clone-dev', () => {
-      sink = bunshinCloneDev(value);
-    })
     .add('structuredClone', () => {
       sink = structuredClone(value);
     })
@@ -104,9 +100,6 @@ async function runCircular(name: string, value: unknown): Promise<void> {
   bench
     .add('bunshin-clone', () => {
       sink = bunshinClone(value);
-    })
-    .add('bunshin-clone-dev', () => {
-      sink = bunshinCloneDev(value);
     })
     .add('structuredClone', () => {
       sink = structuredClone(value);
