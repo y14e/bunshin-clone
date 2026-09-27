@@ -15,7 +15,7 @@ import { klona } from 'klona';
 import cloneDeep from 'lodash.clonedeep';
 import rfdc from 'rfdc';
 import { Bench } from 'tinybench';
-import { bunshinClone } from '../src/index';
+import { bunshinClone } from 'bunshin-clone';
 
 let sink: unknown;
 
