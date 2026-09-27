@@ -50,8 +50,8 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
 
   // Array
   if (Array.isArray(value)) {
-    // Fast path: shallow clonable
-    if (isShallowClonableArray(value)) {
+    // Fast path: shallow
+    if (isShallowArray(value)) {
       const result = value.slice() as T;
       refs.set(value, result);
       return result;
@@ -332,16 +332,6 @@ function createErrorInstance(
   return result;
 }
 
-function isShallowClonableArray(array: unknown[]): boolean {
-  for (let i = 0, l = array.length; i < l; i++) {
-    if (isObject(array[i])) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
 export function forEachOwnKey(
   object: PlainObject,
   callback: (key: string | symbol) => void,
@@ -367,6 +357,16 @@ export function isPlainObject(value: unknown): value is PlainObject {
 
   const proto = Object.getPrototypeOf(value);
   return proto === Object.prototype || proto === null;
+}
+
+export function isShallowArray(array: unknown[]): boolean {
+  for (let i = 0, l = array.length; i < l; i++) {
+    if (isObject(array[i])) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 export function isUnsafeKey(key: PropertyKey): boolean {
