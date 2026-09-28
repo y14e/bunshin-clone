@@ -1,3 +1,5 @@
+import type { TypedArray } from 'type-fest';
+
 export interface BunshinCloneOptions {
   preserveBufferSharing: boolean;
   preserveDescriptors: boolean;
@@ -5,21 +7,9 @@ export interface BunshinCloneOptions {
   strictDescriptors: boolean;
 }
 
+type ArrayBufferView = DataView | TypedArray;
 type PlainObject = Record<PropertyKey, unknown>;
 type Refs = WeakMap<object, unknown>;
-type TypedArray =
-  | Int8Array
-  | Uint8Array
-  | Uint8ClampedArray
-  | Int16Array
-  | Uint16Array
-  | Int32Array
-  | Uint32Array
-  | Float16Array
-  | Float32Array
-  | Float64Array
-  | BigInt64Array
-  | BigUint64Array;
 
 export function bunshinClone<T>(
   value: T,
@@ -100,17 +90,17 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
     return result as T;
   }
 
-  // ArrayBuffer view (DataView/TypedArray)
+  // ArrayBufferView (DataView/TypedArray)
   if (ArrayBuffer.isView(value)) {
     return cloneArrayBufferView(
-      value as unknown as DataView | TypedArray,
+      value as unknown as ArrayBufferView,
       settings,
       refs,
     ) as T;
   }
 
-  // DOMException/Error
-  if (value instanceof DOMException || value instanceof Error) {
+  // Error
+  if (value instanceof Error) {
     return cloneError(value, settings, refs) as T;
   }
 
@@ -240,10 +230,10 @@ function clonePlainObject(
 }
 
 function cloneArrayBufferView(
-  view: DataView | TypedArray,
+  view: ArrayBufferView,
   settings: BunshinCloneOptions,
   refs: Refs,
-): DataView | TypedArray {
+): ArrayBufferView {
   // DataView
   if (view instanceof DataView) {
     const { buffer, byteOffset, byteLength } = view;
@@ -289,10 +279,10 @@ function cloneBuffer(buffer: ArrayBufferLike, refs: Refs): ArrayBufferLike {
 }
 
 function cloneError(
-  error: DOMException | Error,
+  error: Error,
   settings: BunshinCloneOptions,
   refs: Refs,
-): DOMException | Error {
+): Error {
   const result = createErrorInstance(error, settings, refs);
   refs.set(error, result); // [Refs]
 
@@ -301,7 +291,7 @@ function cloneError(
     return result;
   }
 
-  // Error
+  // Others
   const { stack, cause } = error;
 
   if (stack) {

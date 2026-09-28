@@ -120,6 +120,15 @@ describe('bunshinClone', () => {
     expect(result.name).toBe('TypeError');
   });
 
+  test('DOMException', () => {
+    const source = new DOMException('fail', 'SyntaxError');
+    const result = bunshinClone(source) as DOMException;
+
+    expect(result).not.toBe(source);
+    expect(result.message).toBe('fail');
+    expect(result.name).toBe('SyntaxError');
+  });
+
   test('AggregateError', () => {
     const err1 = new Error('error 1');
     const err2 = new TypeError('error 2');
@@ -307,4 +316,3 @@ describe('bunshinClone', () => {
     expect(result).toBe(fn);
   });
 });
-
