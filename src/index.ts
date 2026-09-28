@@ -218,7 +218,10 @@ function clonePlainObject(
     }
   } else {
     for (const key of Reflect.ownKeys(object)) {
-      if (isUnsafeKey(key) || !Object.propertyIsEnumerable.call(object, key)) {
+      if (
+        isUnsafeKey(key) ||
+        !Object.prototype.propertyIsEnumerable.call(object, key)
+      ) {
         continue;
       }
 
