@@ -55,7 +55,7 @@ If `true`, preserves symbol keys (slower).
 
 ### `strictDescriptors`
 
-If `true`, throws if descriptor cannot be merged (e.g. non-configurable or non-writable).
+If `true`, throws if property descriptor cannot be copied (e.g. non-configurable or non-writable).
 
 ## 📖 Details
 
