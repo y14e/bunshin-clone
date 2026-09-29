@@ -182,8 +182,8 @@ function cloneArray(
   settings: BunshinCloneOptions,
   refs: Refs,
 ): unknown[] {
-  // Fast path: shallow copyable array
-  if (isShallowArray(array)) {
+  // Fast path: primitive array
+  if (array.every((item) => !isObject(item))) {
     const result = array.slice();
     refs.set(array, result);
     return result;
@@ -381,10 +381,6 @@ export function isPlainObject(value: unknown): value is PlainObject {
 
   const proto = Object.getPrototypeOf(value);
   return proto === Object.prototype || proto === null;
-}
-
-export function isShallowArray(array: unknown[]): boolean {
-  return array.every((item) => !isObject(item));
 }
 
 export function isUnsafeKey(key: PropertyKey): boolean {

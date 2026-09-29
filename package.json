@@ -1,6 +1,6 @@
 {
   "name": "bunshin-clone",
-  "version": "1.8.4",
+  "version": "1.8.5",
   "description": "High-performance deep clone utility with descriptor support",
   "keywords": [
     "array",
@@ -59,9 +59,14 @@
     "README.md"
   ],
   "scripts": {
+    "bench": "bun tsup & npm run bench:install & npm run bench:run & npm run bench:uninstall",
+    "bench:install": "npm i bunshin-clone-npm@npm:bunshin-clone klona lodash.clonedeep @types/lodash.clonedeep rfdc tinybench",
+    "bench:run": "node ./benchmark/run.ts",
+    "bench:uninstall": "npm un bunshin-clone-npm klona lodash.clonedeep @types/lodash.clonedeep rfdc tinybench",
     "build": "tsup",
     "lint": "tsc --noEmit",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "test": "bun test"
   },
   "devDependencies": {
     "bun-types": "latest",
