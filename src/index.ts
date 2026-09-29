@@ -78,9 +78,10 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
 
   // RegExp
   if (value instanceof RegExp) {
-    const result = new RegExp(value.source, value.flags);
+    const { source, flags, lastIndex } = value;
+    const result = new RegExp(source, flags);
     refs.set(value, result); // [Refs]
-    result.lastIndex = value.lastIndex;
+    result.lastIndex = lastIndex;
     return result as T;
   }
 
@@ -107,7 +108,8 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
 
   // Blob
   if (value instanceof Blob) {
-    const result = value.slice(0, value.size, value.type);
+    const { size, type } = value;
+    const result = value.slice(0, size, type);
     refs.set(value, result); // [Refs]
     return result as T;
   }
