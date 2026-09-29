@@ -60,9 +60,9 @@
   ],
   "scripts": {
     "bench": "bun tsup & npm run bench:install & npm run bench:run & npm run bench:uninstall",
-    "bench:install": "npm i bunshin-clone-npm@npm:bunshin-clone klona lodash.clonedeep @types/lodash.clonedeep rfdc tinybench",
+    "bench:install": "npm i bunshin-clone-npm@npm:bunshin-clone lodash.clonedeep @types/lodash.clonedeep tinybench",
     "bench:run": "node ./benchmark/run.ts",
-    "bench:uninstall": "npm un bunshin-clone-npm klona lodash.clonedeep @types/lodash.clonedeep rfdc tinybench",
+    "bench:uninstall": "npm un bunshin-clone-npm lodash.clonedeep @types/lodash.clonedeep tinybench",
     "build": "tsup",
     "lint": "tsc --noEmit",
     "prepublishOnly": "npm run build",
@@ -79,5 +79,11 @@
   },
   "allowScripts": {
     "esbuild": true
+  },
+  "dependencies": {
+    "@types/lodash.clonedeep": "^4.5.9",
+    "bunshin-clone-npm": "npm:bunshin-clone@^1.8.5",
+    "lodash.clonedeep": "^4.5.0",
+    "tinybench": "^6.2.0"
   }
 }

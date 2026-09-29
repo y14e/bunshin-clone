@@ -1,14 +1,9 @@
 import { bunshinClone } from 'bunshin-clone-npm';
-import { klona } from 'klona';
 import cloneDeep from 'lodash.clonedeep';
-import rfdc from 'rfdc';
 import { Bench } from 'tinybench';
 import { bunshinClone as bunshinCloneDev } from '../dist/index.js';
 
 let sink: unknown;
-
-const cloneRfdc = rfdc();
-const cloneRfdcCircles = rfdc({ circles: true });
 
 // ----------------------------------------
 // Output
@@ -63,12 +58,6 @@ async function run(name: string, value: unknown): Promise<void> {
     })
     .add('lodash.clonedeep', () => {
       sink = cloneDeep(value);
-    })
-    .add('rfdc', () => {
-      sink = cloneRfdc(value);
-    })
-    .add('klona', () => {
-      sink = klona(value);
     });
 
   await bench.run();
@@ -100,12 +89,6 @@ async function runCircular(name: string, value: unknown): Promise<void> {
     })
     .add('lodash.clonedeep', () => {
       sink = cloneDeep(value);
-    })
-    .add('rfdc (circles)', () => {
-      sink = cloneRfdcCircles(value);
-    })
-    .add('klona', () => {
-      sink = klona(value);
     });
 
   await bench.run();
