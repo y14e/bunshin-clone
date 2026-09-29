@@ -20,6 +20,7 @@ export function bunshinClone<T>(
 }
 
 function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
+  // Primitive
   if (!isObject(value)) {
     return value;
   }
