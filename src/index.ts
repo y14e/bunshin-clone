@@ -185,7 +185,7 @@ function cloneArray(
   // Fast path: primitive array
   if (array.every((item) => !isObject(item))) {
     const result = array.slice();
-    refs.set(array, result);
+    refs.set(array, result); // [Refs]
     return result;
   }
 
