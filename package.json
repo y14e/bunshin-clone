@@ -79,11 +79,5 @@
   },
   "allowScripts": {
     "esbuild": true
-  },
-  "dependencies": {
-    "@types/lodash.clonedeep": "^4.5.9",
-    "bunshin-clone-npm": "npm:bunshin-clone@^1.8.5",
-    "lodash.clonedeep": "^4.5.0",
-    "tinybench": "^6.2.0"
   }
 }
