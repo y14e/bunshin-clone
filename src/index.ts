@@ -8,7 +8,7 @@ export interface BunshinCloneOptions {
 }
 
 type ArrayBufferView = DataView | TypedArray;
-type PlainObject = Record<PropertyKey, unknown>;
+export type PlainObject = Record<PropertyKey, unknown>;
 type Refs = WeakMap<object, unknown>;
 
 export function bunshinClone<T>(
@@ -20,7 +20,7 @@ export function bunshinClone<T>(
 }
 
 function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
-  // Primitive
+  // Primitive: return as-is
   if (!isObject(value)) {
     return value;
   }
@@ -30,8 +30,10 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
     return refs.get(value) as T;
   }
 
+  const isClonePlainObject = isPlainObject(value);
+
   // With descriptors
-  if (settings.preserveDescriptors && isPlainObject(value)) {
+  if (settings.preserveDescriptors && isClonePlainObject) {
     return cloneWithDescriptors(value, settings, refs) as T;
   }
 
@@ -41,7 +43,7 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
   }
 
   // Plain object
-  if (isPlainObject(value)) {
+  if (isClonePlainObject) {
     return clonePlainObject(value, settings, refs) as T;
   }
 
@@ -143,7 +145,7 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
     return result as T;
   }
 
-  // Fallback: unsupported types
+  // Unsupported types: return as-is
   refs.set(value, value); // [Refs]
   return value;
 }
@@ -186,7 +188,7 @@ function cloneArray(
   refs: Refs,
 ): unknown[] {
   // Fast path: primitive array
-  if (array.every((item) => !isObject(item))) {
+  if (isPrimitiveArray(array)) {
     const result = array.slice();
     refs.set(array, result); // [Refs]
     return result;
@@ -346,14 +348,14 @@ function createErrorInstance(
     );
   }
 
-  // Standard built-in errors
+  // Other standard built-in errors
   const Ctor = ERROR_CTORS[name];
 
   if (Ctor) {
     return new Ctor(message);
   }
 
-  // Fallback: unknown error types
+  // Unknown error types
   const result = new Error(message);
   result.name = name;
   return result;
@@ -384,6 +386,10 @@ export function isPlainObject(value: unknown): value is PlainObject {
 
   const proto = Object.getPrototypeOf(value);
   return proto === Object.prototype || proto === null;
+}
+
+export function isPrimitiveArray(array: unknown[]): boolean {
+  return array.every((item) => !isObject(item));
 }
 
 export function isUnsafeKey(key: PropertyKey): boolean {

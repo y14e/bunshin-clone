@@ -1,6 +1,6 @@
 {
   "name": "bunshin-clone",
-  "version": "1.8.6",
+  "version": "1.8.7",
   "description": "High-performance deep clone utility with descriptor support",
   "keywords": [
     "array",

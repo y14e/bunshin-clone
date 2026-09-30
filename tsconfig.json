@@ -23,8 +23,8 @@
     "verbatimModuleSyntax": true,
 
     // language-and-environment
-    "lib": ["ESNext", "DOM"],
-    "target": "ESNext",
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
+    "target": "ES2024",
 
     // completeness
     "skipLibCheck": true
