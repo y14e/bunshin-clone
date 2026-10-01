@@ -94,7 +94,7 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
     return result as T;
   }
 
-  // ArrayBufferView (DataView/TypedArray)
+  // ArrayBuffer view (DataView/TypedArray)
   if (ArrayBuffer.isView(value)) {
     return cloneArrayBufferView(
       value as unknown as ArrayBufferView,
