@@ -9,7 +9,7 @@ export interface BunshinCloneOptions {
 
 type ArrayBufferView = DataView | TypedArray;
 export type PlainObject = Record<PropertyKey, unknown>;
-type Refs = WeakMap<object, unknown>;
+type Refs = WeakMap<object, object>;
 
 export function bunshinClone<T>(
   value: T,
@@ -49,26 +49,12 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
 
   // Map
   if (value instanceof Map) {
-    const result = new Map<unknown, unknown>();
-    refs.set(value, result); // [Refs]
-
-    for (const [key, v] of value) {
-      result.set(clone(key, settings, refs), clone(v, settings, refs));
-    }
-
-    return result as T;
+    return cloneMap(value, settings, refs) as T;
   }
 
   // Set
   if (value instanceof Set) {
-    const result = new Set<unknown>();
-    refs.set(value, result); // [Refs]
-
-    for (const item of value) {
-      result.add(clone(item, settings, refs));
-    }
-
-    return result as T;
+    return cloneSet(value, settings, refs) as T;
   }
 
   // Date
@@ -135,13 +121,8 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
 
   // URLSearchParams
   if (value instanceof URLSearchParams) {
-    const result = new URLSearchParams();
+    const result = new URLSearchParams(value);
     refs.set(value, result); // [Refs]
-
-    for (const [key, v] of value) {
-      result.append(key, v);
-    }
-
     return result as T;
   }
 
@@ -159,9 +140,9 @@ function cloneWithDescriptors(
   refs.set(object, result); // [Refs]
   const descs = Object.getOwnPropertyDescriptors(object);
 
-  forEachOwnKey(descs, (key) => {
+  for (const key of Reflect.ownKeys(descs)) {
     if (isUnsafeKey(key)) {
-      return;
+      continue;
     }
 
     const desc = { ...descs[key] };
@@ -177,7 +158,7 @@ function cloneWithDescriptors(
         throw error;
       }
     }
-  });
+  }
 
   return result;
 }
@@ -232,6 +213,43 @@ function clonePlainObject(
 
       result[key] = clone(object[key], settings, refs);
     }
+  }
+
+  return result;
+}
+
+function cloneMap(
+  map: Map<unknown, unknown>,
+  settings: BunshinCloneOptions,
+  refs: Refs,
+): Map<unknown, unknown> {
+  const result = new Map<unknown, unknown>();
+  refs.set(map, result); // [Refs]
+
+  for (const [key, value] of map) {
+    result.set(clone(key, settings, refs), clone(value, settings, refs));
+  }
+
+  return result;
+}
+
+function cloneSet(
+  set: Set<unknown>,
+  settings: BunshinCloneOptions,
+  refs: Refs,
+): Set<unknown> {
+  // Fast path: primitive Set
+  if (isPrimitiveSet(set)) {
+    const result = new Set(set);
+    refs.set(set, result);
+    return result;
+  }
+
+  const result = new Set<unknown>();
+  refs.set(set, result); // [Refs]
+
+  for (const item of set) {
+    result.add(clone(item, settings, refs));
   }
 
   return result;
@@ -361,19 +379,6 @@ function createErrorInstance(
   return result;
 }
 
-export function forEachOwnKey(
-  object: PlainObject,
-  callback: (key: string | symbol) => void,
-): void {
-  for (const key of Object.keys(object)) {
-    callback(key);
-  }
-
-  for (const symbol of Object.getOwnPropertySymbols(object)) {
-    callback(symbol);
-  }
-}
-
 export function isObject(value: unknown): value is object {
   // 'typeof null' is 'object', but TS 'object' type is non-null.
   return typeof value === 'object' && value !== null;
@@ -390,6 +395,16 @@ export function isPlainObject(value: unknown): value is PlainObject {
 
 export function isPrimitiveArray(array: unknown[]): boolean {
   return array.every((item) => !isObject(item));
+}
+
+function isPrimitiveSet(set: Set<unknown>): boolean {
+  for (const value of set) {
+    if (isObject(value)) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 export function isUnsafeKey(key: PropertyKey): boolean {

@@ -260,6 +260,32 @@ const map = new Map(
   ]),
 );
 
+const primitiveMap = new Map(
+  Array.from({ length: 500 }, (_, i) => [`key${i}`, i] as const),
+);
+
+const objectMap = new Map(
+  Array.from({ length: 500 }, (_, i) => [
+    { id: i },
+    {
+      id: i,
+      nested: {
+        value: i,
+      },
+    },
+  ]),
+);
+
+const mixedMapObjectFirst = new Map<unknown, unknown>([
+  [{ id: 0 }, { value: 0 }],
+  ...Array.from({ length: 499 }, (_, i) => [`key${i + 1}`, i + 1] as const),
+]);
+
+const mixedMapObjectLast = new Map<unknown, unknown>([
+  ...Array.from({ length: 499 }, (_, i) => [`key${i}`, i] as const),
+  [{ id: 499 }, { value: 499 }],
+]);
+
 // Set
 const set = new Set(
   Array.from({ length: 50 }, (_, i) => ({
@@ -267,6 +293,25 @@ const set = new Set(
     value: `value-${i}`,
   })),
 );
+
+const primitiveSet = new Set(Array.from({ length: 500 }, (_, i) => i));
+
+const objectSet = new Set(
+  Array.from({ length: 500 }, (_, i) => ({
+    id: i,
+    value: `value-${i}`,
+  })),
+);
+
+const mixedSetObjectFirst = new Set<unknown>([
+  { id: 0 },
+  ...Array.from({ length: 499 }, (_, i) => i + 1),
+]);
+
+const mixedSetObjectLast = new Set<unknown>([
+  ...Array.from({ length: 499 }, (_, i) => i),
+  { id: 499 },
+]);
 
 // Date + RegExp
 const builtins = {
@@ -346,9 +391,20 @@ async function main(): Promise<void> {
   await run('object array (500)', objectArray);
   await run('mixed nested array (250)', mixedArray);
 
-  // Built-ins
+  // Map / Set
   await run('Map (50)', map);
+  await run('primitive Map (500)', primitiveMap);
+  await run('object Map (500)', objectMap);
+  await run('mixed Map: object first (500)', mixedMapObjectFirst);
+  await run('mixed Map: object last (500)', mixedMapObjectLast);
+
   await run('Set (50)', set);
+  await run('primitive Set (500)', primitiveSet);
+  await run('object Set (500)', objectSet);
+  await run('mixed Set: object first (500)', mixedSetObjectFirst);
+  await run('mixed Set: object last (500)', mixedSetObjectLast);
+
+  // Other built-ins
   await run('Date / RegExp / URL / URLSearchParams', builtins);
   await run('Float64Array (1000)', typedArray);
 
