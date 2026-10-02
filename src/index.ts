@@ -210,11 +210,9 @@ function clonePlainObject(
 
   // String keys
   for (const key of Object.keys(object)) {
-    if (isUnsafeKey(key)) {
-      continue;
+    if (!isUnsafeKey(key)) {
+      result[key] = clone(object[key], settings, refs);
     }
-
-    result[key] = clone(object[key], settings, refs);
   }
 
   // Symbol keys
