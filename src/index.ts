@@ -241,7 +241,7 @@ function cloneSet(
   // Fast path: primitive Set
   if (isPrimitiveSet(set)) {
     const result = new Set(set);
-    refs.set(set, result);
+    refs.set(set, result); // [Refs]
     return result;
   }
 
