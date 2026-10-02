@@ -168,21 +168,10 @@ function cloneArray(
   settings: BunshinCloneOptions,
   refs: Refs,
 ): unknown[] {
-  // Fast path: primitive array
-  if (isPrimitiveArray(array)) {
-    const result = array.slice();
-    refs.set(array, result); // [Refs]
-    return result;
-  }
-
-  const { length } = array;
-  const result = new Array<unknown>(length);
+  const result = isPrimitiveArray(array)
+    ? array.slice() // Fast path: primitive array
+    : array.map((item) => clone(item, settings, refs));
   refs.set(array, result); // [Refs]
-
-  for (let i = 0; i < length; i++) {
-    result[i] = clone(array[i], settings, refs);
-  }
-
   return result;
 }
 
