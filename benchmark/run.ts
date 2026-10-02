@@ -165,6 +165,37 @@ async function runBufferSharing(name: string, value: unknown): Promise<void> {
   print(bench);
 }
 
+async function runSymbolKeys(name: string, value: unknown): Promise<void> {
+  console.log(`\n=== ${name} ===`);
+
+  const bench = new Bench({
+    time: 100,
+    warmupTime: 100,
+  });
+
+  bench
+    .add('bunshin-clone (dev): default', () => {
+      sink = bunshinCloneDev(value);
+    })
+    .add('bunshin-clone: default', () => {
+      sink = bunshinClone(value);
+    })
+    .add('bunshin-clone (dev): preserveSymbolKeys', () => {
+      sink = bunshinCloneDev(value, {
+        preserveSymbolKeys: true,
+      });
+    })
+    .add('bunshin-clone: preserveSymbolKeys', () => {
+      sink = bunshinClone(value, {
+        preserveSymbolKeys: true,
+      });
+    });
+
+  await bench.run();
+
+  print(bench);
+}
+
 // ----------------------------------------
 // Data
 // ----------------------------------------
@@ -223,6 +254,33 @@ const large = Object.fromEntries(
     },
   ]),
 );
+
+// Symbol keys object (文字列キー + Symbolキーの混合)
+const sym1 = Symbol('id');
+const sym2 = Symbol('meta');
+const sym3 = Symbol('hidden');
+
+const symbolObject = {
+  [sym1]: 123,
+  [sym2]: { role: 'admin' },
+  [sym3]: 'secret',
+  active: true,
+  name: 'symbol-test',
+  nested: {
+    foo: 'bar',
+  },
+};
+
+// Wide Symbol object (Symbolキー主体の大きなオブジェクト)
+const wideSymbolObject = Object.fromEntries(
+  Array.from({ length: 50 }, (_, i) => [`key${i}`, i]),
+);
+for (let i = 0; i < 50; i++) {
+  wideSymbolObject[Symbol(`symKey${i}`) as unknown as string] = {
+    id: i,
+    value: `value-${i}`,
+  };
+}
 
 // Primitive array
 const primitiveArray = Array.from({ length: 500 }, (_, i) => i);
@@ -385,6 +443,10 @@ async function main(): Promise<void> {
   await run('deeply nested object', nested);
   await run('wide object (100 properties)', wide);
   await run('large object (1000 properties)', large);
+
+  // Symbol keys
+  await runSymbolKeys('symbol keys object', symbolObject);
+  await runSymbolKeys('wide symbol object (50 string + 50 symbol)', wideSymbolObject);
 
   // Arrays
   await run('primitive array (500)', primitiveArray);

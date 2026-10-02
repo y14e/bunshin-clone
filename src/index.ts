@@ -131,6 +131,11 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
   return value;
 }
 
+const IS_ENUMERABLE = Object.prototype.propertyIsEnumerable;
+const OWN_DESCS = Object.getOwnPropertyDescriptors;
+const OWN_NAMES = Object.getOwnPropertyNames;
+const OWN_SYMBOLS = Object.getOwnPropertySymbols;
+
 function cloneWithDescriptors(
   object: PlainObject,
   settings: BunshinCloneOptions,
@@ -138,9 +143,10 @@ function cloneWithDescriptors(
 ): PlainObject {
   const result: PlainObject = Object.create(Object.getPrototypeOf(object));
   refs.set(object, result); // [Refs]
-  const descs = Object.getOwnPropertyDescriptors(object);
+  const descs = OWN_DESCS(object);
 
-  for (const key of Reflect.ownKeys(descs)) {
+  // String keys
+  for (const key of OWN_NAMES(object)) {
     if (isUnsafeKey(key)) {
       continue;
     }
@@ -156,6 +162,25 @@ function cloneWithDescriptors(
     } catch (error) {
       if (settings.strictDescriptors) {
         throw error;
+      }
+    }
+  }
+
+  // Symbol keys
+  if (settings.preserveSymbolKeys) {
+    for (const symbol of OWN_SYMBOLS(object)) {
+      const desc = { ...descs[symbol] };
+
+      if ('value' in desc) {
+        desc.value = clone(desc.value, settings, refs);
+      }
+
+      try {
+        Object.defineProperty(result, symbol, desc);
+      } catch (error) {
+        if (settings.strictDescriptors) {
+          throw error;
+        }
       }
     }
   }
@@ -183,24 +208,21 @@ function clonePlainObject(
   const result: PlainObject = Object.create(Object.getPrototypeOf(object));
   refs.set(object, result); // [Refs]
 
-  if (!settings.preserveSymbolKeys) {
-    for (const key in object) {
-      if (isUnsafeKey(key) || !Object.hasOwn(object, key)) {
-        continue;
-      }
-
-      result[key] = clone(object[key], settings, refs);
+  // String keys
+  for (const key of Object.keys(object)) {
+    if (isUnsafeKey(key)) {
+      continue;
     }
-  } else {
-    for (const key of Reflect.ownKeys(object)) {
-      if (
-        isUnsafeKey(key) ||
-        !Object.prototype.propertyIsEnumerable.call(object, key)
-      ) {
-        continue;
-      }
 
-      result[key] = clone(object[key], settings, refs);
+    result[key] = clone(object[key], settings, refs);
+  }
+
+  // Symbol keys
+  if (settings.preserveSymbolKeys) {
+    for (const symbol of OWN_SYMBOLS(object)) {
+      if (IS_ENUMERABLE.call(object, symbol)) {
+        result[symbol] = clone(object[symbol], settings, refs);
+      }
     }
   }
 
