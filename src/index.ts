@@ -145,7 +145,7 @@ function cloneWithDescriptors(
   refs.set(object, result); // [Refs]
   const descs = OWN_DESCS(object);
 
-  // String keys
+  // String keys (including non-enumerable)
   for (const key of OWN_NAMES(object)) {
     if (isUnsafeKey(key)) {
       continue;
@@ -166,7 +166,7 @@ function cloneWithDescriptors(
     }
   }
 
-  // Symbol keys
+  // Symbol keys (including non-enumerable)
   if (settings.preserveSymbolKeys) {
     for (const symbol of OWN_SYMBOLS(object)) {
       const desc = { ...descs[symbol] };
@@ -208,14 +208,14 @@ function clonePlainObject(
   const result: PlainObject = Object.create(Object.getPrototypeOf(object));
   refs.set(object, result); // [Refs]
 
-  // String keys
+  // String keys (only enumerable)
   for (const key of Object.keys(object)) {
     if (!isUnsafeKey(key)) {
       result[key] = clone(object[key], settings, refs);
     }
   }
 
-  // Symbol keys
+  // Symbol keys (only enumerable)
   if (settings.preserveSymbolKeys) {
     for (const symbol of OWN_SYMBOLS(object)) {
       if (IS_ENUMERABLE.call(object, symbol)) {
