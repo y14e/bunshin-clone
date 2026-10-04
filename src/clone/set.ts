@@ -25,7 +25,7 @@ export function cloneSet(
   return result;
 }
 
-export function isPrimitiveSet(set: Set<unknown>): boolean {
+function isPrimitiveSet(set: Set<unknown>): boolean {
   for (const value of set) {
     if (isObject(value)) {
       return false;

@@ -1,4 +1,4 @@
-import { cloneArray } from '@/clone/array';
+import { cloneArray, isPrimitiveArray } from '@/clone/array';
 import { cloneArrayBuffer } from '@/clone/array-buffer';
 import { cloneArrayBufferView } from '@/clone/array-buffer-view';
 import { cloneBlob } from '@/clone/blob';
@@ -12,9 +12,16 @@ import { cloneSet } from '@/clone/set';
 import { cloneURL } from '@/clone/url';
 import { cloneURLSearchParams } from '@/clone/url-search-params';
 import { cloneWithDescriptors } from '@/clone/with-descriptors';
+import {
+  OWN_DESCS,
+  OWN_ENUM_STRING_KEYS,
+  OWN_ENUM_SYMBOL_KEYS,
+  OWN_STRING_KEYS,
+  OWN_SYMBOL_KEYS,
+} from '@/constants';
 import type { Refs } from '@/ref';
 import type { ArrayBufferView_, BunshinCloneOptions } from '@/types';
-import { isObject, isPlainObject } from '@/utils';
+import { isObject, isPlainObject, isUnsafeKey } from '@/utils';
 
 export function bunshinClone<T>(
   value: T,
@@ -156,3 +163,15 @@ function resolveOptions(
     strictDescriptors,
   };
 }
+
+export {
+  isObject,
+  isPlainObject,
+  isPrimitiveArray,
+  isUnsafeKey,
+  OWN_DESCS,
+  OWN_ENUM_STRING_KEYS,
+  OWN_ENUM_SYMBOL_KEYS,
+  OWN_STRING_KEYS,
+  OWN_SYMBOL_KEYS,
+};

@@ -1,6 +1,6 @@
 import type { PlainObject } from '@/types';
 
-export const IS_ENUMERABLE = Object.prototype.propertyIsEnumerable;
+const IS_ENUMERABLE = Object.prototype.propertyIsEnumerable;
 export const OWN_DESCS = Object.getOwnPropertyDescriptors;
 export const OWN_ENUM_STRING_KEYS = Object.keys;
 export const OWN_ENUM_SYMBOL_KEYS = (o: PlainObject): symbol[] =>
