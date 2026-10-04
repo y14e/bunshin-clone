@@ -3,7 +3,7 @@ import { OWN_DESCS, OWN_STRING_KEYS, OWN_SYMBOL_KEYS } from '@/own';
 import type { Refs } from '@/ref';
 import type { BunshinCloneOptions, PlainObject } from '@/types';
 
-function cloneWithDescriptors(
+export function cloneWithDescriptors(
   object: PlainObject,
   settings: BunshinCloneOptions,
   refs: Refs,

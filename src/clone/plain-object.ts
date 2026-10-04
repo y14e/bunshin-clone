@@ -3,7 +3,7 @@ import { OWN_ENUM_STRING_KEYS, OWN_ENUM_SYMBOL_KEYS } from '@/own';
 import type { Refs } from '@/ref';
 import type { BunshinCloneOptions, PlainObject } from '@/types';
 
-function clonePlainObject(
+export function clonePlainObject(
   object: PlainObject,
   settings: BunshinCloneOptions,
   refs: Refs,
