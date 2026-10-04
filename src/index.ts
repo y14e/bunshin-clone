@@ -12,13 +12,6 @@ import { cloneSet } from '@/clone/set';
 import { cloneURL } from '@/clone/url';
 import { cloneURLSearchParams } from '@/clone/url-search-params';
 import { cloneWithDescriptors } from '@/clone/with-descriptors';
-import {
-  OWN_DESCS,
-  OWN_ENUM_STRING_KEYS,
-  OWN_ENUM_SYMBOL_KEYS,
-  OWN_STRING_KEYS,
-  OWN_SYMBOL_KEYS,
-} from '@/own';
 import type { Refs } from '@/ref';
 import type {
   ArrayBufferView_,
@@ -173,10 +166,5 @@ export {
   isObject,
   isPlainObject,
   isPrimitiveArray,
-  OWN_DESCS,
-  OWN_ENUM_STRING_KEYS,
-  OWN_ENUM_SYMBOL_KEYS,
-  OWN_STRING_KEYS,
-  OWN_SYMBOL_KEYS,
   type PlainObject,
 };
