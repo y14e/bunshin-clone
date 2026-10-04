@@ -1,7 +1,7 @@
 import type { Refs } from '@/ref';
 
-export function cloneURL(value: URL, refs: Refs): URL {
-  const result = new URL(value.href);
-  refs.set(value, result); // [Refs]
+export function cloneURL(url: URL, refs: Refs): URL {
+  const result = new URL(url.href);
+  refs.set(url, result); // [Refs]
   return result;
 }
