@@ -1,4 +1,3 @@
-import { OWN_ENUM_STRING_KEYS } from '@/constants';
 import { clone } from '@/index';
 import type { Refs } from '@/ref';
 import type { BunshinCloneOptions } from '@/types';
@@ -29,7 +28,7 @@ export function cloneError(
     result.cause = clone(cause, settings, refs);
   }
 
-  for (const key of OWN_ENUM_STRING_KEYS(error)) {
+  for (const key of Object.keys(error)) {
     Reflect.set(result, key, clone(Reflect.get(error, key), settings, refs));
   }
 

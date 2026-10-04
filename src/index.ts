@@ -18,7 +18,7 @@ import {
   OWN_ENUM_SYMBOL_KEYS,
   OWN_STRING_KEYS,
   OWN_SYMBOL_KEYS,
-} from '@/constants';
+} from '@/own';
 import type { Refs } from '@/ref';
 import type {
   ArrayBufferView_,
