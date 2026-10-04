@@ -11,13 +11,17 @@ export function clonePlainObject(
   const result: PlainObject = Object.create(Object.getPrototypeOf(object));
   refs.set(object, result); // [Refs]
 
-  for (const key of OWN_ENUM_STRING_KEYS(object)) {
+  function copy(key: string | symbol) {
     result[key] = clone(object[key], settings, refs);
+  }
+
+  for (const key of OWN_ENUM_STRING_KEYS(object)) {
+    copy(key);
   }
 
   if (settings.preserveSymbolKeys) {
     for (const key of OWN_ENUM_SYMBOL_KEYS(object)) {
-      result[key] = clone(object[key], settings, refs);
+      copy(key);
     }
   }
 

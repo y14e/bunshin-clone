@@ -12,7 +12,7 @@ export function cloneWithDescriptors(
   refs.set(object, result); // [Refs]
   const descs = OWN_DESCS(object);
 
-  for (const key of OWN_STRING_KEYS(object)) {
+  function copy(key: string | symbol) {
     const desc = { ...descs[key] };
 
     if ('value' in desc) {
@@ -28,21 +28,13 @@ export function cloneWithDescriptors(
     }
   }
 
+  for (const key of OWN_STRING_KEYS(object)) {
+    copy(key);
+  }
+
   if (settings.preserveSymbolKeys) {
     for (const key of OWN_SYMBOL_KEYS(object)) {
-      const desc = { ...descs[key] };
-
-      if ('value' in desc) {
-        desc.value = clone(desc.value, settings, refs);
-      }
-
-      try {
-        Object.defineProperty(result, key, desc);
-      } catch (error) {
-        if (settings.strictDescriptors) {
-          throw error;
-        }
-      }
+      copy(key);
     }
   }
 
