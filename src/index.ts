@@ -20,7 +20,11 @@ import {
   OWN_SYMBOL_KEYS,
 } from '@/constants';
 import type { Refs } from '@/ref';
-import type { ArrayBufferView_, BunshinCloneOptions, PlainObject } from '@/types';
+import type {
+  ArrayBufferView_,
+  BunshinCloneOptions,
+  PlainObject,
+} from '@/types';
 import { isObject, isPlainObject, isUnsafeKey } from '@/utils';
 
 export function bunshinClone<T>(
@@ -166,7 +170,6 @@ function resolveOptions(
 
 export {
   type BunshinCloneOptions,
-  type PlainObject,
   isObject,
   isPlainObject,
   isPrimitiveArray,
@@ -176,4 +179,5 @@ export {
   OWN_ENUM_SYMBOL_KEYS,
   OWN_STRING_KEYS,
   OWN_SYMBOL_KEYS,
+  type PlainObject,
 };
