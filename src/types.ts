@@ -4,7 +4,6 @@ export interface BunshinCloneOptions {
   preserveBufferSharing: boolean;
   preserveDescriptors: boolean;
   preserveSymbolKeys: boolean;
-  strictDescriptors: boolean;
 }
 
 export type ArrayBufferView_ = DataView | TypedArray;

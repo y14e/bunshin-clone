@@ -205,6 +205,26 @@ describe('bunshinClone', () => {
     expect(Object.getOwnPropertyDescriptor(result, 'x')?.get).toBeDefined();
   });
 
+  test('preserveDescriptors: accessor descriptor without value is preserved', () => {
+    const getter = () => ({ nested: 1 });
+    const source = {};
+    Object.defineProperty(source, 'x', {
+      configurable: true,
+      enumerable: true,
+      get: getter,
+    });
+
+    const result = bunshinClone(source, { preserveDescriptors: true });
+    const desc = Object.getOwnPropertyDescriptor(result, 'x');
+
+    expect(desc).toBeDefined();
+    if (!desc) {
+      throw new Error('Expected descriptor');
+    }
+    expect('value' in desc).toBe(false);
+    expect(desc.get).toBe(getter);
+  });
+
   /* --- Symbol キー関連のテスト (デフォルト false / 明示的 true) --- */
 
   test('symbol-keyed property is excluded by default (preserveSymbolKeys: false)', () => {

@@ -129,14 +129,8 @@ function resolveOptions(
   let {
     preserveBufferSharing = false,
     preserveDescriptors = false,
-    strictDescriptors = false,
     preserveSymbolKeys = false,
   } = options;
-
-  if (typeof preserveSymbolKeys !== 'boolean') {
-    console.warn('Invalid preserveSymbolKeys option. Fallback: false.');
-    preserveSymbolKeys = false;
-  }
 
   if (typeof preserveBufferSharing !== 'boolean') {
     console.warn('Invalid preserveBufferSharing option. Fallback: false.');
@@ -148,16 +142,15 @@ function resolveOptions(
     preserveDescriptors = false;
   }
 
-  if (typeof strictDescriptors !== 'boolean') {
-    console.warn('Invalid strictDescriptors option. Fallback: false.');
-    strictDescriptors = false;
+  if (typeof preserveSymbolKeys !== 'boolean') {
+    console.warn('Invalid preserveSymbolKeys option. Fallback: false.');
+    preserveSymbolKeys = false;
   }
 
   return {
     preserveBufferSharing,
     preserveDescriptors,
     preserveSymbolKeys,
-    strictDescriptors,
   };
 }
 

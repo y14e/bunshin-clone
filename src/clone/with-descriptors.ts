@@ -19,13 +19,7 @@ export function cloneWithDescriptors(
       desc.value = clone(desc.value, settings, refs);
     }
 
-    try {
-      Object.defineProperty(result, key, desc);
-    } catch (error) {
-      if (settings.strictDescriptors) {
-        throw error;
-      }
-    }
+    Object.defineProperty(result, key, desc);
   }
 
   for (const key of OWN_STRING_KEYS(object)) {
