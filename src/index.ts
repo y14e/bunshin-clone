@@ -131,10 +131,14 @@ function clone<T>(value: T, settings: BunshinCloneOptions, refs: Refs): T {
   return value;
 }
 
-const IS_ENUMERABLE = Object.prototype.propertyIsEnumerable;
 const OWN_DESCS = Object.getOwnPropertyDescriptors;
-const OWN_NAMES = Object.getOwnPropertyNames;
-const OWN_SYMBOLS = Object.getOwnPropertySymbols;
+const OWN_ENUM_STRING_KEYS = Object.keys;
+const OWN_ENUM_SYMBOL_KEYS = (object: PlainObject): symbol[] =>
+  OWN_SYMBOL_KEYS(object).filter((k) =>
+    Object.prototype.propertyIsEnumerable.call(object, k),
+  );
+const OWN_STRING_KEYS = Object.getOwnPropertyNames;
+const OWN_SYMBOL_KEYS = Object.getOwnPropertySymbols;
 
 function cloneWithDescriptors(
   object: PlainObject,
@@ -145,8 +149,7 @@ function cloneWithDescriptors(
   refs.set(object, result); // [Refs]
   const descs = OWN_DESCS(object);
 
-  // String keys (including non-enumerable)
-  for (const key of OWN_NAMES(object)) {
+  for (const key of OWN_STRING_KEYS(object)) {
     if (isUnsafeKey(key)) {
       continue;
     }
@@ -166,17 +169,16 @@ function cloneWithDescriptors(
     }
   }
 
-  // Symbol keys (including non-enumerable)
   if (settings.preserveSymbolKeys) {
-    for (const symbol of OWN_SYMBOLS(object)) {
-      const desc = { ...descs[symbol] };
+    for (const key of OWN_SYMBOL_KEYS(object)) {
+      const desc = { ...descs[key] };
 
       if ('value' in desc) {
         desc.value = clone(desc.value, settings, refs);
       }
 
       try {
-        Object.defineProperty(result, symbol, desc);
+        Object.defineProperty(result, key, desc);
       } catch (error) {
         if (settings.strictDescriptors) {
           throw error;
@@ -208,19 +210,15 @@ function clonePlainObject(
   const result: PlainObject = Object.create(Object.getPrototypeOf(object));
   refs.set(object, result); // [Refs]
 
-  // String keys (only enumerable)
-  for (const key of Object.keys(object)) {
+  for (const key of OWN_ENUM_STRING_KEYS(object)) {
     if (!isUnsafeKey(key)) {
       result[key] = clone(object[key], settings, refs);
     }
   }
 
-  // Symbol keys (only enumerable)
   if (settings.preserveSymbolKeys) {
-    for (const symbol of OWN_SYMBOLS(object)) {
-      if (IS_ENUMERABLE.call(object, symbol)) {
-        result[symbol] = clone(object[symbol], settings, refs);
-      }
+    for (const key of OWN_ENUM_SYMBOL_KEYS(object)) {
+      result[key] = clone(object[key], settings, refs);
     }
   }
 
@@ -339,7 +337,7 @@ function cloneError(
     result.cause = clone(cause, settings, refs);
   }
 
-  for (const key of Object.keys(error)) {
+  for (const key of OWN_ENUM_STRING_KEYS(error)) {
     Reflect.set(result, key, clone(Reflect.get(error, key), settings, refs));
   }
 

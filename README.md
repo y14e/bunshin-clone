@@ -47,7 +47,7 @@ If `true`, preserves shared backing buffers between TypedArray and DataView inst
 
 ### `preserveDescriptors`
 
-If `true`, preserves property descriptors (getters/setters, etc.).
+If `true`, preserves property descriptors, including non-enumerable properties.
 
 ### `preserveSymbolKeys`
 
