@@ -1,5 +1,4 @@
 import type { PlainObject } from '@/types';
-import { isUnsafeKey } from '@/utils';
 
 export const OWN_DESCS = Object.getOwnPropertyDescriptors;
 
@@ -40,3 +39,10 @@ export const OWN_STRING_KEYS = (object: PlainObject): string[] => {
 };
 
 export const OWN_SYMBOL_KEYS = Object.getOwnPropertySymbols;
+
+function isUnsafeKey(key: PropertyKey): boolean {
+  return (
+    typeof key === 'string' &&
+    (key === '__proto__' || key === 'prototype' || key === 'constructor')
+  );
+}

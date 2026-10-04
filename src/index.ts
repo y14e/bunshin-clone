@@ -25,7 +25,7 @@ import type {
   BunshinCloneOptions,
   PlainObject,
 } from '@/types';
-import { isObject, isPlainObject, isUnsafeKey } from '@/utils';
+import { isObject, isPlainObject } from '@/utils';
 
 export function bunshinClone<T>(
   value: T,
@@ -173,7 +173,6 @@ export {
   isObject,
   isPlainObject,
   isPrimitiveArray,
-  isUnsafeKey,
   OWN_DESCS,
   OWN_ENUM_STRING_KEYS,
   OWN_ENUM_SYMBOL_KEYS,

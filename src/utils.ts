@@ -13,10 +13,3 @@ export function isPlainObject(value: unknown): value is PlainObject {
   const proto = Object.getPrototypeOf(value);
   return proto === Object.prototype || proto === null;
 }
-
-export function isUnsafeKey(key: PropertyKey): boolean {
-  return (
-    typeof key === 'string' &&
-    (key === '__proto__' || key === 'prototype' || key === 'constructor')
-  );
-}
