@@ -1,4 +1,4 @@
-import { OWN_DESCS, OWN_STRING_KEYS, OWN_SYMBOL_KEYS } from '@y14e/own';
+import { OWN_DESCS, OWN_KEYS } from '@y14e/own';
 import { clone } from '@/index';
 import type { Refs } from '@/ref';
 import type { BunshinCloneOptions, PlainObject } from '@/types';
@@ -12,7 +12,7 @@ export function cloneWithDescriptors(
   refs.set(object, result); // [Refs]
   const descs = OWN_DESCS(object);
 
-  function copy(key: string | symbol) {
+  for (const key of OWN_KEYS(object, settings.preserveSymbolKeys)) {
     const desc = { ...descs[key] };
 
     if ('value' in desc) {
@@ -20,16 +20,6 @@ export function cloneWithDescriptors(
     }
 
     Object.defineProperty(result, key, desc);
-  }
-
-  for (const key of OWN_STRING_KEYS(object)) {
-    copy(key);
-  }
-
-  if (settings.preserveSymbolKeys) {
-    for (const key of OWN_SYMBOL_KEYS(object)) {
-      copy(key);
-    }
   }
 
   return result;
