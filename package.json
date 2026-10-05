@@ -1,6 +1,6 @@
 {
   "name": "bunshin-clone",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "High-performance deep clone utility with descriptor support",
   "keywords": [
     "array",
@@ -81,6 +81,6 @@
     "esbuild": true
   },
   "dependencies": {
-    "@y14e/own": "^1.0.2"
+    "@y14e/own": "^1.0.3"
   }
 }
