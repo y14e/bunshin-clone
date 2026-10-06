@@ -11,7 +11,6 @@ import { cloneRegExp } from '@/clone/regexp';
 import { cloneSet } from '@/clone/set';
 import { cloneURL } from '@/clone/url';
 import { cloneURLSearchParams } from '@/clone/url-search-params';
-import { cloneWithDescriptors } from '@/clone/with-descriptors';
 import type { Refs } from '@/ref';
 import type {
   ArrayBufferView_,
@@ -42,20 +41,13 @@ export function clone<T>(
     return refs.get(value) as T;
   }
 
-  const isClonePlainObject = isPlainObject(value);
-
-  // With descriptors
-  if (settings.preserveDescriptors && isClonePlainObject) {
-    return cloneWithDescriptors(value, settings, refs) as T;
-  }
-
   // Array
   if (Array.isArray(value)) {
     return cloneArray(value, settings, refs) as T;
   }
 
   // Plain object
-  if (isClonePlainObject) {
+  if (isPlainObject(value)) {
     return clonePlainObject(value, settings, refs) as T;
   }
 
