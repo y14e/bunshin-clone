@@ -18,6 +18,7 @@ export function clonePlainObject(
   refs.set(object, result); // [Refs]
   const { preserveDescriptors, preserveSymbolKeys } = settings;
 
+  // Do not preserve property descriptors; faster (default)
   if (!preserveDescriptors) {
     for (const key of (!preserveSymbolKeys
       ? OWN_ENUM_STRING_KEYS
@@ -28,6 +29,7 @@ export function clonePlainObject(
     return result;
   }
 
+  // Preserve property descriptors; slower (optional)
   const descs = OWN_DESCS(object);
 
   for (const key of (!preserveSymbolKeys ? OWN_STRING_KEYS : OWN_KEYS)(
