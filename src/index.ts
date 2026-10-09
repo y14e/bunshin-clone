@@ -11,6 +11,7 @@ import { cloneRegExp } from '@/clone/regexp';
 import { cloneSet } from '@/clone/set';
 import { cloneURL } from '@/clone/url';
 import { cloneURLSearchParams } from '@/clone/url-search-params';
+import { resolveOptions } from '@/options';
 import type { Refs } from '@/ref';
 import type {
   ArrayBufferView_,
@@ -113,37 +114,6 @@ export function clone<T>(
   // Unsupported types: return as-is
   refs.set(value, value); // [Refs]
   return value;
-}
-
-function resolveOptions(
-  options: Partial<BunshinCloneOptions>,
-): BunshinCloneOptions {
-  let {
-    preserveBufferSharing = false,
-    preserveDescriptors = false,
-    preserveSymbolKeys = false,
-  } = options;
-
-  if (typeof preserveBufferSharing !== 'boolean') {
-    console.warn('Invalid preserveBufferSharing option. Fallback: false.');
-    preserveBufferSharing = false;
-  }
-
-  if (typeof preserveDescriptors !== 'boolean') {
-    console.warn('Invalid preserveDescriptors option. Fallback: false.');
-    preserveDescriptors = false;
-  }
-
-  if (typeof preserveSymbolKeys !== 'boolean') {
-    console.warn('Invalid preserveSymbolKeys option. Fallback: false.');
-    preserveSymbolKeys = false;
-  }
-
-  return {
-    preserveBufferSharing,
-    preserveDescriptors,
-    preserveSymbolKeys,
-  };
 }
 
 export {
