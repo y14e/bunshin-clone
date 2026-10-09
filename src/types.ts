@@ -7,4 +7,5 @@ export interface BunshinCloneOptions {
 }
 
 export type ArrayBufferView_ = DataView | TypedArray;
+
 export type PlainObject = Record<PropertyKey, unknown>;
