@@ -345,3 +345,160 @@ describe('bunshinClone', () => {
     expect(result).toBe(fn);
   });
 });
+
+describe('bunshinClone - Edge Cases', () => {
+  /* --- 1. 特殊なプリミティブ / JavaScript 組み込みオブジェクト --- */
+
+  test('special primitives (NaN, Infinity, -0, BigInt, Symbol)', () => {
+    expect(Number.isNaN(bunshinClone(NaN))).toBe(true);
+    expect(bunshinClone(Infinity)).toBe(Infinity);
+    expect(bunshinClone(-Infinity)).toBe(-Infinity);
+    expect(Object.is(bunshinClone(-0), -0)).toBe(true);
+    expect(bunshinClone(123n)).toBe(123n);
+
+    const sym = Symbol('unique');
+    expect(bunshinClone(sym)).toBe(sym);
+  });
+
+  test('sparse array (empty slots)', () => {
+    // eslint-disable-next-line no-sparse-arrays
+    const source = [1, , 3];
+    const result = bunshinClone(source);
+
+    expect(result).toEqual([1, undefined, 3]);
+    expect(0 in result).toBe(true);
+    // cloneArray は .map を使うため、空きスロットは undefined に埋められて密な配列になります
+    expect(result.length).toBe(3);
+  });
+
+  /* --- 2. Set / Map のエッジケース --- */
+
+  test('Set: mixture of primitives and objects', () => {
+    const obj = { key: 'value' };
+    const source = new Set<any>([1, 'a', obj]);
+    const result = bunshinClone(source);
+
+    expect(result).not.toBe(source);
+    expect(result.size).toBe(3);
+
+    // オブジェクト要素のみ参照が分離されているか検証
+    const resultItems = [...result];
+    expect(resultItems[0]).toBe(1);
+    expect(resultItems[1]).toBe('a');
+    expect(resultItems[2]).toEqual(obj);
+    expect(resultItems[2]).not.toBe(obj);
+  });
+
+  test('Set / Map: self-referential (circular dependency)', () => {
+    const setSource = new Set<any>();
+    setSource.add(setSource);
+
+    const setResult = bunshinClone(setSource);
+    expect(setResult).not.toBe(setSource);
+    expect(setResult.has(setResult)).toBe(true);
+
+    const mapSource = new Map<any, any>();
+    mapSource.set(mapSource, mapSource);
+
+    const mapResult = bunshinClone(mapSource);
+    expect(mapResult).not.toBe(mapSource);
+    expect(mapResult.get(mapResult)).toBe(mapResult);
+  });
+
+  test('Map: primitive keys and object keys', () => {
+    const keyObj = { id: 1 };
+    const valObj = { name: 'test' };
+    const source = new Map<any, any>([
+      ['strKey', valObj],
+      [keyObj, 'strVal'],
+    ]);
+
+    const result = bunshinClone(source);
+    expect(result).not.toBe(source);
+
+    // キーがオブジェクトの場合、キー自体もクローンされて参照が変わる
+    const clonedKeyObj = [...result.keys()].find((k) => typeof k === 'object');
+    expect(clonedKeyObj).toEqual(keyObj);
+    expect(clonedKeyObj).not.toBe(keyObj);
+    expect(result.get(clonedKeyObj)).toBe('strVal');
+  });
+
+  /* --- 3. プロトタイプ継承・特殊オブジェクト --- */
+
+  test('custom class instances are treated as unsupported and returned as-is', () => {
+    class CustomClass {
+      foo = 'bar';
+    }
+
+    const source = new CustomClass();
+    const result = bunshinClone(source);
+
+    // isPlainObject ではないため、クローンされずそのまま返されるのが正しい仕様
+    expect(result).toBe(source);
+  });
+
+  test('Object.create(null) - objects without prototype', () => {
+    const source = Object.create(null);
+    source.a = { b: 1 };
+
+    const result = bunshinClone(source);
+
+    expect(Object.getPrototypeOf(result)).toBeNull();
+    expect(result.a).toEqual({ b: 1 });
+    expect(result.a).not.toBe(source.a);
+  });
+
+  /* --- 4. TypedArray / ArrayBufferView のメモリ共有オプション --- */
+
+  test('TypedArray with preserveBufferSharing: true', () => {
+    const buffer = new ArrayBuffer(16);
+    const view1 = new Int32Array(buffer, 0, 2);
+    const view2 = new Int32Array(buffer, 8, 2);
+
+    const source = { view1, view2 };
+    const result = bunshinClone(source, { preserveBufferSharing: true });
+
+    expect(result.view1.buffer).toBe(result.view2.buffer);
+    expect(result.view1.buffer).not.toBe(buffer);
+  });
+
+  /* --- 5. エラーオブジェクト (Error) の特殊プロパティ・cause --- */
+
+  test('Error with cause and custom nested properties', () => {
+    const causeErr = new Error('cause error');
+    const source = new Error('main error', { cause: causeErr });
+    (source as any).extra = { nested: true };
+
+    const result = bunshinClone(source) as any;
+
+    expect(result).not.toBe(source);
+    expect(result.message).toBe('main error');
+    expect(result.cause).not.toBe(causeErr);
+    expect(result.cause.message).toBe('cause error');
+    expect(result.extra).toEqual({ nested: true });
+    expect(result.extra).not.toBe((source as any).extra);
+  });
+
+  /* --- 6. セキュリティ / 不正なオプションフォールバック --- */
+
+  test('invalid options fallback gracefully', () => {
+    // 開発時に型を無視して不正な値を渡された場合の判定ログ・フォールバック検証
+    const source = { a: 1 };
+    const result = bunshinClone(source, {
+      preserveDescriptors: 'invalid' as any,
+    });
+
+    expect(result).toEqual({ a: 1 });
+  });
+
+  test('prototype pollution security test (constructor, prototype, __proto__)', () => {
+    const source = JSON.parse(
+      '{"constructor": {"prototype": {"polluted": true}}}',
+    );
+
+    const result = bunshinClone(source);
+
+    expect(({} as any).polluted).toBeUndefined();
+    expect(result.constructor).not.toBe(source.constructor);
+  });
+});
