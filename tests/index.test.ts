@@ -65,12 +65,21 @@ describe('bunshinClone', () => {
   });
 
   test('Set', () => {
-    const source = new Set([{ x: 1 }]);
+    const source = new Set([0, 1, 2, 3]);
+    const result = bunshinClone(source) as Set<any>;
+
+    expect(result).not.toBe(source);
+    expect(result).toEqual(source);
+  });
+
+  test('Set with objects', () => {
+    const source = new Set([{ a: 1 }]);
     const result = bunshinClone(source) as Set<any>;
 
     const [value] = result;
     const [original] = source;
 
+    expect(result).not.toBe(source);
     expect(value).toEqual(original);
     expect(value).not.toBe(original);
   });
