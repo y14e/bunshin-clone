@@ -3,11 +3,13 @@ import type { Refs } from '@/ref';
 import type { BunshinCloneOptions } from '@/types';
 import { isObject } from '@/utils';
 
+type Set_ = Set<unknown>;
+
 export function cloneSet(
-  set: Set<unknown>,
+  set: Set_,
   settings: BunshinCloneOptions,
   refs: Refs,
-): Set<unknown> {
+): Set_ {
   // Fast path: primitive Set
   if (isPrimitiveSet(set)) {
     const result = new Set(set);
@@ -15,7 +17,7 @@ export function cloneSet(
     return result;
   }
 
-  const result = new Set<unknown>();
+  const result: Set_ = new Set();
   refs.set(set, result); // [Refs]
 
   for (const item of set) {
@@ -25,7 +27,7 @@ export function cloneSet(
   return result;
 }
 
-function isPrimitiveSet(set: Set<unknown>): boolean {
+function isPrimitiveSet(set: Set_): boolean {
   for (const value of set) {
     if (isObject(value)) {
       return false;

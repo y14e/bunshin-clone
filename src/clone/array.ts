@@ -3,11 +3,13 @@ import type { Refs } from '@/ref';
 import type { BunshinCloneOptions } from '@/types';
 import { isObject } from '@/utils';
 
+type Array_ = unknown[];
+
 export function cloneArray(
-  array: unknown[],
+  array: Array_,
   settings: BunshinCloneOptions,
   refs: Refs,
-): unknown[] {
+): Array_ {
   const result = isPrimitiveArray(array)
     ? array.slice() // Fast path: primitive array
     : array.map((i) => clone(i, settings, refs));
@@ -15,6 +17,6 @@ export function cloneArray(
   return result;
 }
 
-export function isPrimitiveArray(array: unknown[]): boolean {
+export function isPrimitiveArray(array: Array_): boolean {
   return array.every((i) => !isObject(i));
 }
