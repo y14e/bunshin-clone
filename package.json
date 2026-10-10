@@ -68,6 +68,9 @@
     "prepublishOnly": "npm run build",
     "test": "bun test"
   },
+  "dependencies": {
+    "@y14e/own": "^1.0.5"
+  },
   "devDependencies": {
     "bun-types": "latest",
     "tsup": "^8.0.0",
@@ -79,8 +82,5 @@
   },
   "allowScripts": {
     "esbuild": true
-  },
-  "dependencies": {
-    "@y14e/own": "^1.0.5"
   }
 }
