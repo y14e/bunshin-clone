@@ -1,6 +1,6 @@
 import type { TypedArray } from 'type-fest';
 
-export interface BunshinCloneOptions {
+export interface Options {
   preserveBufferSharing: boolean;
   preserveDescriptors: boolean;
   preserveSymbolKeys: boolean;

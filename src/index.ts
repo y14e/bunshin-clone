@@ -13,25 +13,14 @@ import { cloneURL } from '@/clone/url';
 import { cloneURLSearchParams } from '@/clone/url-search-params';
 import { resolveOptions } from '@/options';
 import type { Refs } from '@/ref';
-import type {
-  ArrayBufferView_,
-  BunshinCloneOptions,
-  PlainObject,
-} from '@/types';
+import type { ArrayBufferView_, Options, PlainObject } from '@/types';
 import { isObject, isPlainObject } from '@/utils';
 
-export function bunshinClone<T>(
-  value: T,
-  options: Partial<BunshinCloneOptions> = {},
-): T {
+export function bunshinClone<T>(value: T, options: Partial<Options> = {}): T {
   return clone(value, resolveOptions(options), new WeakMap());
 }
 
-export function clone<T>(
-  value: T,
-  settings: BunshinCloneOptions,
-  refs: Refs,
-): T {
+export function clone<T>(value: T, settings: Options, refs: Refs): T {
   // Primitive: return as-is
   if (!isObject(value)) {
     return value;
@@ -117,9 +106,9 @@ export function clone<T>(
 }
 
 export {
-  type BunshinCloneOptions,
   isObject,
   isPlainObject,
   isPrimitiveArray,
+  type Options as BunshinCloneOptions,
   type PlainObject,
 };

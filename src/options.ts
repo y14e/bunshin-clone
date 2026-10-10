@@ -1,8 +1,6 @@
-import type { BunshinCloneOptions } from '@/types';
+import type { Options } from '@/types';
 
-export function resolveOptions(
-  options: Partial<BunshinCloneOptions>,
-): BunshinCloneOptions {
+export function resolveOptions(options: Partial<Options>): Options {
   let {
     preserveBufferSharing = false,
     preserveDescriptors = false,

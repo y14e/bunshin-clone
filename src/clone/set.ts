@@ -1,15 +1,11 @@
 import { clone } from '@/index';
 import type { Refs } from '@/ref';
-import type { BunshinCloneOptions } from '@/types';
+import type { Options } from '@/types';
 import { isObject } from '@/utils';
 
 type Set_ = Set<unknown>;
 
-export function cloneSet(
-  set: Set_,
-  settings: BunshinCloneOptions,
-  refs: Refs,
-): Set_ {
+export function cloneSet(set: Set_, settings: Options, refs: Refs): Set_ {
   // Fast path: primitive Set
   if (isPrimitiveSet(set)) {
     const result = new Set(set);

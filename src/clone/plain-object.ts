@@ -7,11 +7,11 @@ import {
 } from '@y14e/own';
 import { clone } from '@/index';
 import type { Refs } from '@/ref';
-import type { BunshinCloneOptions, PlainObject } from '@/types';
+import type { Options, PlainObject } from '@/types';
 
 export function clonePlainObject(
   object: PlainObject,
-  settings: BunshinCloneOptions,
+  settings: Options,
   refs: Refs,
 ): PlainObject {
   const result: PlainObject = Object.create(Object.getPrototypeOf(object));

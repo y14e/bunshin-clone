@@ -1,12 +1,10 @@
 import { clone } from '@/index';
 import type { Refs } from '@/ref';
-import type { BunshinCloneOptions } from '@/types';
+import type { Options } from '@/types';
 
-export function cloneError(
-  error: Error,
-  settings: BunshinCloneOptions,
-  refs: Refs,
-): Error {
+type Error_ = DOMException | Error;
+
+export function cloneError(error: Error, settings: Options, refs: Refs): Error {
   const result = createErrorInstance(error, settings, refs);
   refs.set(error, result); // [Refs]
 
@@ -45,10 +43,10 @@ const ERROR_CTORS: Record<string, new (message?: string) => Error> = {
 };
 
 function createErrorInstance(
-  error: DOMException | Error,
-  settings: BunshinCloneOptions,
+  error: Error_,
+  settings: Options,
   refs: Refs,
-): DOMException | Error {
+): Error_ {
   const { message, name } = error;
 
   // DOMException

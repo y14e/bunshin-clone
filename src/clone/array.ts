@@ -1,13 +1,13 @@
 import { clone } from '@/index';
 import type { Refs } from '@/ref';
-import type { BunshinCloneOptions } from '@/types';
+import type { Options } from '@/types';
 import { isObject } from '@/utils';
 
 type Array_ = unknown[];
 
 export function cloneArray(
   array: Array_,
-  settings: BunshinCloneOptions,
+  settings: Options,
   refs: Refs,
 ): Array_ {
   const result = isPrimitiveArray(array)
