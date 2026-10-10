@@ -1,6 +1,6 @@
 import type { TypedArray } from 'type-fest';
 import type { Refs } from '@/ref';
-import type { ArrayBufferView_, Options } from '@/types';
+import type { ArrayBufferView_, BunshinCloneOptions as Options } from '@/types';
 
 export function cloneArrayBufferView(
   view: ArrayBufferView_,

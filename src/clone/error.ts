@@ -1,6 +1,6 @@
 import { clone } from '@/index';
 import type { Refs } from '@/ref';
-import type { Options } from '@/types';
+import type { BunshinCloneOptions as Options } from '@/types';
 
 type Error_ = DOMException | Error;
 

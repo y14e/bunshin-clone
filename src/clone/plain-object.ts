@@ -7,7 +7,7 @@ import {
 } from '@y14e/own';
 import { clone } from '@/index';
 import type { Refs } from '@/ref';
-import type { Options, PlainObject } from '@/types';
+import type { BunshinCloneOptions as Options, PlainObject } from '@/types';
 
 export function clonePlainObject(
   object: PlainObject,
