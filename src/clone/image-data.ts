@@ -1,10 +1,10 @@
 import type { Refs } from '@/ref';
 
-export function cloneImageData(data: ImageData, refs: Refs): ImageData {
-  const { data: d, width, height, colorSpace } = data;
-  const result = new ImageData(new Uint8ClampedArray(d), width, height, {
+export function cloneImageData(image: ImageData, refs: Refs): ImageData {
+  const { data, width, height, colorSpace } = image;
+  const result = new ImageData(new Uint8ClampedArray(data), width, height, {
     colorSpace,
   });
-  refs.set(data, result); // [Refs]
+  refs.set(image, result); // [Refs]
   return result;
 }
