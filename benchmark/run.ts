@@ -1,7 +1,7 @@
 import { bunshinClone } from 'bunshin-clone-npm';
 import cloneDeep from 'lodash.clonedeep';
 import { Bench } from 'tinybench';
-import { bunshinClone as bunshinCloneDev } from '../dist/index.js';
+import { bunshinClone as bunshinCloneDev } from '../dist/index.bundle.js';
 
 let sink: unknown;
 
@@ -446,7 +446,10 @@ async function main(): Promise<void> {
 
   // Symbol keys
   await runSymbolKeys('symbol keys object', symbolObject);
-  await runSymbolKeys('wide symbol object (50 string + 50 symbol)', wideSymbolObject);
+  await runSymbolKeys(
+    'wide symbol object (50 string + 50 symbol)',
+    wideSymbolObject,
+  );
 
   // Arrays
   await run('primitive array (500)', primitiveArray);
