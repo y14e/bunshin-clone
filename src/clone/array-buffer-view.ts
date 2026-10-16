@@ -1,4 +1,5 @@
 import type { TypedArray } from 'type-fest';
+import { clone } from '@/index';
 import type { Refs } from '@/ref';
 import type { ArrayBufferView_, BunshinCloneOptions as Options } from '@/types';
 
@@ -11,7 +12,7 @@ export function cloneArrayBufferView(
   if (view instanceof DataView) {
     const { buffer, byteOffset, byteLength } = view;
     const result = new DataView(
-      cloneBuffer(buffer, refs),
+      clone(buffer, settings, refs),
       byteOffset,
       byteLength,
     );
@@ -36,17 +37,7 @@ export function cloneArrayBufferView(
     length: number,
   ) => TypedArray;
   const { buffer, byteOffset, length } = view;
-  const result = new Ctor(cloneBuffer(buffer, refs), byteOffset, length);
+  const result = new Ctor(clone(buffer, settings, refs), byteOffset, length);
   refs.set(view, result); // [Refs]
-  return result;
-}
-
-function cloneBuffer(buffer: ArrayBufferLike, refs: Refs): ArrayBufferLike {
-  if (refs.has(buffer)) {
-    return refs.get(buffer) as ArrayBufferLike;
-  }
-
-  const result = buffer.slice(0);
-  refs.set(buffer, result); // [Refs]
   return result;
 }
