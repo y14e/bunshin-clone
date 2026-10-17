@@ -1,7 +1,7 @@
-import { clone } from '@/index';
-import type { Refs } from '@/ref';
-import type { BunshinCloneOptions as Options } from '@/types';
-import { isObject } from '@/utils';
+import { clone } from '../index';
+import type { Refs } from '../ref';
+import type { BunshinCloneOptions as Options } from '../types';
+import { isObject } from '../utils';
 
 type Array_ = unknown[];
 

@@ -1,4 +1,4 @@
-import type { Refs } from '@/ref';
+import type { Refs } from '../ref';
 
 export function cloneRegExp(re: RegExp, refs: Refs): RegExp {
   const { source, flags, lastIndex } = re;

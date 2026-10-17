@@ -1,4 +1,4 @@
-import type { Refs } from '@/ref';
+import type { Refs } from '../ref';
 
 export function cloneBlob(blob: Blob, refs: Refs): Blob {
   const { size, type } = blob;

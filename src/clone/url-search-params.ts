@@ -1,4 +1,4 @@
-import type { Refs } from '@/ref';
+import type { Refs } from '../ref';
 
 export function cloneURLSearchParams(
   params: URLSearchParams,

@@ -1,4 +1,4 @@
-import type { PlainObject } from '@/types';
+import type { PlainObject } from './types';
 
 export function isObject(value: unknown): value is object {
   // 'typeof null' is 'object', but TS 'object' type is non-null.

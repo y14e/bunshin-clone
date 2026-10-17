@@ -5,9 +5,9 @@ import {
   OWN_KEYS,
   OWN_STRING_KEYS,
 } from '@y14e/own';
-import { clone } from '@/index';
-import type { Refs } from '@/ref';
-import type { BunshinCloneOptions as Options, PlainObject } from '@/types';
+import { clone } from '../index';
+import type { Refs } from '../ref';
+import type { BunshinCloneOptions as Options, PlainObject } from '../types';
 
 export function clonePlainObject(
   object: PlainObject,

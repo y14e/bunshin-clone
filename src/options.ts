@@ -1,4 +1,4 @@
-import type { BunshinCloneOptions as Options } from '@/types';
+import type { BunshinCloneOptions as Options } from './types';
 
 export function resolveOptions(options: Partial<Options>): Options {
   let {

@@ -1,4 +1,4 @@
-import type { Refs } from '@/ref';
+import type { Refs } from '../ref';
 
 export function cloneImageData(image: ImageData, refs: Refs): ImageData {
   const { data, width, height, colorSpace } = image;

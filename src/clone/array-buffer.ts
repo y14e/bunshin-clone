@@ -1,4 +1,4 @@
-import type { Refs } from '@/ref';
+import type { Refs } from '../ref';
 
 export function cloneArrayBuffer(buffer: ArrayBuffer, refs: Refs): ArrayBuffer {
   const result = buffer.slice(0);

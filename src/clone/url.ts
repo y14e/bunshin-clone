@@ -1,4 +1,4 @@
-import type { Refs } from '@/ref';
+import type { Refs } from '../ref';
 
 export function cloneURL(url: URL, refs: Refs): URL {
   const result = new URL(url.href);

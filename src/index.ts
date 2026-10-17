@@ -1,24 +1,24 @@
-import { cloneArray, isPrimitiveArray } from '@/clone/array';
-import { cloneArrayBuffer } from '@/clone/array-buffer';
-import { cloneArrayBufferView } from '@/clone/array-buffer-view';
-import { cloneBlob } from '@/clone/blob';
-import { cloneDate } from '@/clone/date';
-import { cloneError } from '@/clone/error';
-import { cloneImageData } from '@/clone/image-data';
-import { cloneMap } from '@/clone/map';
-import { clonePlainObject } from '@/clone/plain-object';
-import { cloneRegExp } from '@/clone/regexp';
-import { cloneSet } from '@/clone/set';
-import { cloneURL } from '@/clone/url';
-import { cloneURLSearchParams } from '@/clone/url-search-params';
-import { resolveOptions } from '@/options';
-import type { Refs } from '@/ref';
+import { cloneArray, isPrimitiveArray } from './clone/array';
+import { cloneArrayBuffer } from './clone/array-buffer';
+import { cloneArrayBufferView } from './clone/array-buffer-view';
+import { cloneBlob } from './clone/blob';
+import { cloneDate } from './clone/date';
+import { cloneError } from './clone/error';
+import { cloneImageData } from './clone/image-data';
+import { cloneMap } from './clone/map';
+import { clonePlainObject } from './clone/plain-object';
+import { cloneRegExp } from './clone/regexp';
+import { cloneSet } from './clone/set';
+import { cloneURL } from './clone/url';
+import { cloneURLSearchParams } from './clone/url-search-params';
+import { resolveOptions } from './options';
+import type { Refs } from './ref';
 import type {
   ArrayBufferView_,
   BunshinCloneOptions as Options,
   PlainObject,
-} from '@/types';
-import { isObject, isPlainObject } from '@/utils';
+} from './types';
+import { isObject, isPlainObject } from './utils';
 
 export function bunshinClone<T>(value: T, options: Partial<Options> = {}): T {
   return clone(value, resolveOptions(options), new WeakMap());
