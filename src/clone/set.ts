@@ -5,13 +5,7 @@ import { isObject } from '@/utils';
 
 type Set_ = Set<unknown>;
 
-type ReadonlySet_ = ReadonlySet<unknown>;
-
-export function cloneSet(
-  set: ReadonlySet_,
-  settings: Options,
-  refs: Refs,
-): Set_ {
+export function cloneSet(set: Set_, settings: Options, refs: Refs): Set_ {
   // Fast path: primitive Set
   if (isPrimitiveSet(set)) {
     const result = new Set(set);
@@ -29,7 +23,7 @@ export function cloneSet(
   return result;
 }
 
-function isPrimitiveSet(set: ReadonlySet_): boolean {
+function isPrimitiveSet(set: Set_): boolean {
   for (const value of set) {
     if (isObject(value)) {
       return false;

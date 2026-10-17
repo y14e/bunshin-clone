@@ -5,13 +5,7 @@ import { isObject } from '@/utils';
 
 type Map_ = Map<unknown, unknown>;
 
-type ReadonlyMap_ = ReadonlyMap<unknown, unknown>;
-
-export function cloneMap(
-  map: ReadonlyMap_,
-  settings: Options,
-  refs: Refs,
-): Map_ {
+export function cloneMap(map: Map_, settings: Options, refs: Refs): Map_ {
   // Fast path: primitive Map
   if (isPrimitiveMap(map)) {
     const result = new Map(map);
@@ -29,7 +23,7 @@ export function cloneMap(
   return result;
 }
 
-function isPrimitiveMap(map: ReadonlyMap_): boolean {
+function isPrimitiveMap(map: Map_): boolean {
   for (const [key, value] of map) {
     if (isObject(key) || isObject(value)) {
       return false;

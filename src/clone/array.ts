@@ -5,10 +5,8 @@ import { isObject } from '@/utils';
 
 type Array_ = unknown[];
 
-type ReadonlyArray_ = ReadonlyArray<unknown>;
-
 export function cloneArray(
-  array: ReadonlyArray_,
+  array: Array_,
   settings: Options,
   refs: Refs,
 ): Array_ {
@@ -19,6 +17,6 @@ export function cloneArray(
   return result;
 }
 
-export function isPrimitiveArray(array: ReadonlyArray_): boolean {
+export function isPrimitiveArray(array: Array_): boolean {
   return array.every((i) => !isObject(i));
 }
