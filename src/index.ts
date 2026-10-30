@@ -7,7 +7,7 @@ import { cloneError } from './clone/error';
 import { cloneImageData } from './clone/image-data';
 import { cloneMap } from './clone/map';
 import { clonePlainObject } from './clone/plain-object';
-import { cloneRegExp } from './clone/regexp';
+import { cloneRegExp } from './clone/reg-exp';
 import { cloneSet } from './clone/set';
 import { cloneURL } from './clone/url';
 import { cloneURLSearchParams } from './clone/url-search-params';
