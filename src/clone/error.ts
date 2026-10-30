@@ -42,11 +42,7 @@ const ERROR_CTORS: Record<string, new (message?: string) => Error> = {
   URIError,
 };
 
-function createErrorInstance(
-  error: Error_,
-  settings: Options,
-  refs: Refs,
-): Error_ {
+function createErrorInstance(error: Error_, settings: Options, refs: Refs): Error_ {
   const { message, name } = error;
 
   // DOMException

@@ -5,11 +5,7 @@ import { isObject } from '../utils';
 
 type Array_ = unknown[];
 
-export function cloneArray(
-  array: Array_,
-  settings: Options,
-  refs: Refs,
-): Array_ {
+export function cloneArray(array: Array_, settings: Options, refs: Refs): Array_ {
   const result = isPrimitiveArray(array)
     ? array.slice() // Fast path: primitive array
     : array.map((i) => clone(i, settings, refs));

@@ -9,20 +9,14 @@ import { clone } from '../index';
 import type { Refs } from '../ref';
 import type { BunshinCloneOptions as Options, PlainObject } from '../types';
 
-export function clonePlainObject(
-  object: PlainObject,
-  settings: Options,
-  refs: Refs,
-): PlainObject {
+export function clonePlainObject(object: PlainObject, settings: Options, refs: Refs): PlainObject {
   const result: PlainObject = Object.create(Object.getPrototypeOf(object));
   refs.set(object, result); // [Refs]
   const { preserveDescriptors, preserveSymbolKeys } = settings;
 
   // Do not preserve property descriptors; faster (default)
   if (!preserveDescriptors) {
-    for (const key of (!preserveSymbolKeys
-      ? OWN_ENUM_STRING_KEYS
-      : OWN_ENUM_KEYS)(object)) {
+    for (const key of (!preserveSymbolKeys ? OWN_ENUM_STRING_KEYS : OWN_ENUM_KEYS)(object)) {
       result[key] = clone(object[key], settings, refs);
     }
 
@@ -32,9 +26,7 @@ export function clonePlainObject(
   // Preserve property descriptors; slower (optional)
   const descs = OWN_DESCS(object);
 
-  for (const key of (!preserveSymbolKeys ? OWN_STRING_KEYS : OWN_KEYS)(
-    object,
-  )) {
+  for (const key of (!preserveSymbolKeys ? OWN_STRING_KEYS : OWN_KEYS)(object)) {
     const desc = { ...descs[key] };
 
     if ('value' in desc) {

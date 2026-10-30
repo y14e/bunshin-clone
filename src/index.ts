@@ -13,11 +13,7 @@ import { cloneURL } from './clone/url';
 import { cloneURLSearchParams } from './clone/url-search-params';
 import { resolveOptions } from './options';
 import type { Refs } from './ref';
-import type {
-  ArrayBufferView_,
-  BunshinCloneOptions as Options,
-  PlainObject,
-} from './types';
+import type { ArrayBufferView_, BunshinCloneOptions as Options, PlainObject } from './types';
 import { isObject, isPlainObject } from './utils';
 
 export function bunshinClone<T>(value: T, options: Partial<Options> = {}): T {
@@ -72,11 +68,7 @@ export function clone<T>(value: T, settings: Options, refs: Refs): T {
 
   // ArrayBuffer view (DataView/TypedArray)
   if (ArrayBuffer.isView(value)) {
-    return cloneArrayBufferView(
-      value as unknown as ArrayBufferView_,
-      settings,
-      refs,
-    ) as T;
+    return cloneArrayBufferView(value as unknown as ArrayBufferView_, settings, refs) as T;
   }
 
   // Error

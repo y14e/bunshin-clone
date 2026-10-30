@@ -22,9 +22,5 @@ export function resolveOptions(options: Partial<Options>): Options {
     preserveSymbolKeys = false;
   }
 
-  return {
-    preserveBufferSharing,
-    preserveDescriptors,
-    preserveSymbolKeys,
-  };
+  return { preserveBufferSharing, preserveDescriptors, preserveSymbolKeys };
 }
