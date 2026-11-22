@@ -4,8 +4,9 @@ import type { BunshinCloneOptions as Options } from '../types';
 import { isObject } from '../utils';
 
 type Array_ = unknown[];
+type ReadonlyArray_ = ReadonlyArray<unknown>;
 
-export function cloneArray(array: Array_, settings: Options, refs: Refs): Array_ {
+export function cloneArray(array: ReadonlyArray_, settings: Options, refs: Refs): Array_ {
   const result = isPrimitiveArray(array)
     ? array.slice() // Fast path: primitive array
     : array.map((i) => clone(i, settings, refs));
@@ -13,6 +14,6 @@ export function cloneArray(array: Array_, settings: Options, refs: Refs): Array_
   return result;
 }
 
-export function isPrimitiveArray(array: Array_): boolean {
+export function isPrimitiveArray(array: ReadonlyArray_): boolean {
   return array.every((i) => !isObject(i));
 }

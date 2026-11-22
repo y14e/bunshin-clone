@@ -3,8 +3,9 @@ import type { Refs } from '../ref';
 import type { BunshinCloneOptions as Options } from '../types';
 
 type Map_ = Map<unknown, unknown>;
+type ReadonlyMap_ = ReadonlyMap<unknown, unknown>;
 
-export function cloneMap(map: Map_, settings: Options, refs: Refs): Map_ {
+export function cloneMap(map: ReadonlyMap_, settings: Options, refs: Refs): Map_ {
   const result: Map_ = new Map();
   refs.set(map, result); // [Refs]
 

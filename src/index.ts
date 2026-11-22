@@ -16,6 +16,13 @@ import type { Refs } from './ref';
 import type { ArrayBufferView_, BunshinCloneOptions as Options, PlainObject } from './types';
 import { isObject, isPlainObject } from './utils';
 
+interface ArrayCtor extends ArrayConstructor {
+  isArray<T>(arg: T): arg is Extract<T, ReadonlyArray<unknown>>;
+}
+
+// biome-ignore lint: enhanced type definitions for Array constructor
+declare const Array: ArrayCtor;
+
 export function bunshinClone<T>(value: T, options: Partial<Options> = {}): T {
   return clone(value, resolveOptions(options), new WeakMap());
 }
