@@ -20,8 +20,15 @@ interface ArrayCtor extends ArrayConstructor {
   isArray<T>(arg: T): arg is Extract<T, ReadonlyArray<unknown>>;
 }
 
+interface ArrayBufferCtor extends ArrayBufferConstructor {
+  isView<T>(arg: T): arg is Extract<T, ArrayBufferView_>;
+}
+
 // biome-ignore lint: enhanced type definitions for Array constructor
 declare const Array: ArrayCtor;
+
+// biome-ignore lint: enhanced type definitions for ArrayBuffer constructor
+declare const ArrayBuffer: ArrayBufferCtor;
 
 export function bunshinClone<T>(value: T, options: Partial<Options> = {}): T {
   return clone(value, resolveOptions(options), new WeakMap());
@@ -75,7 +82,7 @@ export function clone<T>(value: T, settings: Options, refs: Refs): T {
 
   // ArrayBuffer view (DataView/TypedArray)
   if (ArrayBuffer.isView(value)) {
-    return cloneArrayBufferView(value as unknown as ArrayBufferView_, settings, refs) as T;
+    return cloneArrayBufferView(value, settings, refs) as T;
   }
 
   // Error
