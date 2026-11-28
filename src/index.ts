@@ -9,8 +9,8 @@ import { cloneMap } from './clone/map';
 import { clonePlainObject } from './clone/plain-object';
 import { cloneRegExp } from './clone/reg-exp';
 import { cloneSet } from './clone/set';
-import { cloneURL } from './clone/url';
-import { cloneURLSearchParams } from './clone/url-search-params';
+import { cloneUrl } from './clone/url';
+import { cloneUrlSearchParams } from './clone/url-search-params';
 import { resolveOptions } from './options';
 import type { Refs } from './ref';
 import type { ArrayBufferView_, BunshinCloneOptions as Options, PlainObject } from './types';
@@ -102,12 +102,12 @@ export function clone<T>(value: T, settings: Options, refs: Refs): T {
 
   // URL
   if (value instanceof URL) {
-    return cloneURL(value, refs) as T;
+    return cloneUrl(value, refs) as T;
   }
 
   // URLSearchParams
   if (value instanceof URLSearchParams) {
-    return cloneURLSearchParams(value, refs) as T;
+    return cloneUrlSearchParams(value, refs) as T;
   }
 
   // Unsupported types: return as-is
